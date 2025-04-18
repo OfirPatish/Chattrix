@@ -45,30 +45,19 @@ const Sidebar = () => {
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
-  const onlineCount = onlineUsers ? Math.max(0, onlineUsers.length - 1) : 0;
-
   return (
-    <aside className="h-full w-40 sm:w-48 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200 overflow-hidden">
+    <aside className="h-full min-w-[72px] w-28 sm:w-40 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200 overflow-hidden">
       {/* Only show contacts header on non-mobile view */}
       {!isMobile && (
-        <div className="border-b border-base-300 w-full p-2 sm:p-4 lg:p-5 flex flex-col">
+        <div className="border-b border-base-300 w-full p-2 sm:p-4 lg:p-5 flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <div className="badge badge-primary p-2 sm:p-3">
               <Users className="size-3 sm:size-4" />
             </div>
-            <span className="font-medium">Contacts</span>
+            <span className="font-medium text-lg">Contacts</span>
           </div>
-
-          {/* Mobile online indicator */}
-          <div className="mt-2 flex justify-center sm:hidden">
-            <div className="badge badge-sm gap-1">
-              <UserCheck className="size-3" />
-              <span>{onlineCount}</span>
-            </div>
-          </div>
-
           {/* Online filter toggle - hidden on smallest screens */}
-          <div className="mt-3 hidden sm:flex items-center gap-2">
+          <div className="mt-1 hidden sm:flex items-center gap-2">
             <label className="cursor-pointer label gap-2 justify-start p-0">
               <input
                 type="checkbox"
@@ -78,7 +67,6 @@ const Sidebar = () => {
               />
               <span className="label-text text-xs lg:text-sm">Online only</span>
             </label>
-            <div className="badge badge-sm">{onlineCount} online</div>
           </div>
         </div>
       )}
@@ -100,26 +88,27 @@ const Sidebar = () => {
                   <img src={user.profilePic || "/avatar.png"} alt={user.username} />
                 </div>
               </div>
-              {onlineUsers?.includes(user._id) && (
-                <span
-                  className="badge badge-xs badge-success absolute bottom-0 right-0 
-                  rounded-full border-2 border-base-100"
-                />
-              )}
             </div>
 
             {/* User info - always visible */}
             <div className="text-left min-w-0 flex-1">
-              <div className="font-medium truncate text-xs lg:text-sm">{user.username}</div>
+              <div
+                className="font-medium truncate text-xs lg:text-sm max-w-[80px] sm:max-w-[120px] lg:max-w-full tooltip tooltip-right"
+                data-tip={user.username}
+              >
+                {user.username}
+              </div>
             </div>
           </button>
         ))}
 
         {filteredUsers.length === 0 && (
-          <div className="alert alert-info mt-2 mx-1 sm:mt-4 sm:mx-2 p-2 sm:p-4">
-            <div className="text-center w-full text-xs sm:text-sm">
-              {isMobile ? "No users online" : "No users found"}
-            </div>
+          <div className="flex items-center justify-center mt-4 mx-2 p-2 bg-base-200 rounded-lg">
+            <span className="text-center w-full text-xs sm:text-sm font-medium text-base-content/60">
+              {isMobile
+                ? "No users online right now."
+                : "No users found. Try adjusting your filters or check back later!"}
+            </span>
           </div>
         )}
       </div>

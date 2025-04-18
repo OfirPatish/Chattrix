@@ -53,24 +53,22 @@ const ChatHeader = () => {
           )}
 
           {/* Avatar */}
-          <div className="chat-image avatar">
+          <div className="chat-image avatar relative">
             <div className="w-8 sm:w-10 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1 sm:ring-offset-2">
               <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.username} />
             </div>
+            {/* Status icon overlay with DaisyUI tooltip */}
+            <span
+              className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${
+                isOnline ? "bg-success" : "bg-gray-400"
+              } tooltip tooltip-bottom`}
+              data-tip={isOnline ? "Online" : "Offline"}
+            ></span>
           </div>
 
           {/* User info */}
           <div className="chat-header flex flex-col">
             <h3 className="font-medium text-sm sm:text-base">{selectedUser.username}</h3>
-
-            {/* Status - always visible */}
-            <div className="text-xs mt-0.5">
-              {isOnline ? (
-                <span className="text-success">Online</span>
-              ) : (
-                <span className="text-base-content/60">Offline</span>
-              )}
-            </div>
           </div>
         </div>
       </div>

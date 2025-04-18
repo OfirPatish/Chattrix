@@ -1,9 +1,9 @@
-import { Clock, Shield } from "lucide-react";
+import { Clock, Shield, MessageSquare } from "lucide-react";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 /**
  * Account stats component
- * Displays user account statistics and information
+ * Modern, minimal horizontal card layout
  */
 const AccountStats = () => {
   const { authUser } = useAuthStore();
@@ -19,25 +19,32 @@ const AccountStats = () => {
     }).format(date);
   };
 
-  return (
-    <div className="card bg-base-100 shadow-xl mb-6">
-      <div className="card-body">
-        <h2 className="card-title text-xl">Account Stats</h2>
-        <div className="stats stats-vertical shadow w-full">
-          <div className="stat">
-            <div className="stat-figure text-primary">
-              <Clock className="w-8 h-8" />
-            </div>
-            <div className="stat-title">Member Since</div>
-            <div className="stat-value text-lg">{formatMemberDate(authUser?.createdAt)}</div>
-          </div>
+  const totalMessages = authUser?.totalMessages || 1234;
 
-          <div className="stat">
-            <div className="stat-figure text-success">
-              <Shield className="w-8 h-8" />
+  return (
+    <div className="bg-base-100 border border-base-200 rounded-xl shadow-sm mb-6 p-6 flex flex-col gap-4">
+      <h2 className="text-lg font-semibold text-base-content/80 mb-2">Account Stats</h2>
+      <div className="flex flex-col gap-3">
+        {/* Member Since */}
+        <div className="flex items-center gap-4 p-3 rounded-lg">
+          <span className="bg-primary/10 p-2 rounded-full">
+            <Clock className="w-6 h-6 text-primary" />
+          </span>
+          <div>
+            <div className="text-xs text-base-content/60">Member Since</div>
+            <div className="font-medium text-base-content">{formatMemberDate(authUser?.createdAt)}</div>
+          </div>
+        </div>
+        {/* Account Status */}
+        <div className="flex items-center gap-4 p-3 rounded-lg">
+          <span className="bg-success/10 p-2 rounded-full">
+            <Shield className="w-6 h-6 text-success" />
+          </span>
+          <div>
+            <div className="text-xs text-base-content/60">Account Status</div>
+            <div className="font-medium text-success flex items-center gap-2">
+              Active <span className="badge badge-success badge-outline text-xs">Verified</span>
             </div>
-            <div className="stat-title">Account Status</div>
-            <div className="stat-value text-success text-lg">Active</div>
           </div>
         </div>
       </div>

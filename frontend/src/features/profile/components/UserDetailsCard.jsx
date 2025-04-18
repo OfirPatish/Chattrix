@@ -14,7 +14,6 @@ const UserDetailsCard = () => {
       <div className="card-body">
         <div className="flex justify-between items-center">
           <h2 className="card-title text-xl">User Details</h2>
-          <div className="badge badge-primary p-3">Active Account</div>
         </div>
 
         <div className="divider my-2"></div>

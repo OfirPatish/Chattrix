@@ -5,7 +5,7 @@ const EmptyChat = () => {
     <div className="w-full flex flex-1 flex-col items-center justify-center bg-base-100/50">
       <div className="hero min-h-[80%]">
         <div className="hero-content text-center">
-          <div className="max-w-md">
+          <div className="max-w-xs">
             <div className="mockup-browser border bg-base-300 mb-8 shadow-lg">
               <div className="mockup-browser-toolbar">
                 <div className="input">chattrix.com</div>
