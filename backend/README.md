@@ -1,110 +1,82 @@
-# 🔧 Chattrix Backend
+# 🚀 Chattrix Backend
 
-This is the server-side implementation for the Chattrix real-time chat application.
+<div align="center">
+  <img src="https://img.shields.io/badge/Node.js-14+-339933?style=for-the-badge&logo=node.js" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/Express-4-000000?style=for-the-badge&logo=express" alt="Express"/>
+  <img src="https://img.shields.io/badge/MongoDB-4.4-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Socket.io-4-010101?style=for-the-badge&logo=socket.io" alt="Socket.io"/>
+</div>
 
-## 🛠️ Technologies Used
+The powerful backend for Chattrix real-time chat application.
 
-- 📡 Node.js & Express for the server
-- 🗃️ MongoDB for database
-- 🔐 JWT for authentication
-- ⚡ Socket.io for real-time communication
-- 🛡️ Helmet for security headers
-- 🚧 Rate limiting for API protection
-- 🔍 Morgan for request logging
-- 🗜️ Compression for response optimization
+## ⚡ Features
 
-## 📂 Project Structure
+- RESTful API with Express
+- Real-time messaging via Socket.io
+- MongoDB for data persistence
+- JWT authentication
+- API security with rate limiting and Helmet
 
-- `controllers/` - Request handlers
-  - `authController.js` - Authentication logic
-  - `messageController.js` - Message handling logic
-- `models/` - Database schemas
-  - `User.js` - User model
-  - `Message.js` - Message model
-- `routes/` - API endpoints
-  - `authRoute.js` - Authentication routes
-  - `messageRoute.js` - Message routes
-  - `healthRoute.js` - System health monitoring
-- `middleware/` - Custom middleware
-  - `authMiddleware.js` - JWT verification
-  - `errorHandler.js` - Global error handling
-  - `securityMiddleware.js` - API rate limiting and headers
-- `lib/` - Utility functions
-  - `database.js` - Database connection
-  - `socket.js` - Socket.io implementation
-- `config/` - Application configuration
-  - `appConfig.js` - Server settings
-
-## 🔌 API Endpoints
-
-### Authentication
-
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/logout` - User logout
-- `GET /api/auth/profile` - Get user profile
-
-### Messages
-
-- `GET /api/messages/:userId` - Get messages with a specific user
-- `POST /api/messages` - Send a new message
-
-### System
-
-- `GET /health` - Check API health status
-
-## 🔒 Security Features
-
-- Helmet for secure HTTP headers
-- Rate limiting to prevent abuse
-- CORS configured for frontend access
-- JWT for secure authentication
-- Cookie security for token storage
-- Input validation and sanitization
-
-## 📋 Getting Started
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- MongoDB
-
-### Setup
-
-1. Install dependencies
-
-   ```
-   npm install
-   ```
-
-2. Set up environment variables in `.env` file
-
-   ```
-   # Database
-   MONGO_URL=your_mongodb_connection_string
-
-   # Server
-   PORT=5000
-   NODE_ENV=development
-
-   # Authentication
-   JWT_SECRET=your_jwt_secret
-
-   # External Services
-   IMGBB_API_KEY=your_imgbb_api_key
-
-   # Client
-   CLIENT_URL=http://localhost:5173
-   ```
-
-### Development
+## 🚦 API Endpoints
 
 ```
+# Auth
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/logout
+GET  /api/auth/profile
+
+# Messages
+GET  /api/messages/:userId
+POST /api/messages
+
+# System
+GET  /health
+```
+
+## 🏃 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-```
 
-### Production
-
-```
+# Start production server
 npm start
+```
+
+## 🔧 Environment Variables
+
+Create a `.env` file with:
+
+```
+# Database
+MONGO_URL=mongodb://localhost:27017/chattrix
+
+# Server
+PORT=3000
+NODE_ENV=development
+
+# Authentication
+JWT_SECRET=your_secure_jwt_secret
+
+# External Services
+IMGBB_API_KEY=your_imgbb_api_key
+
+# Client
+CLIENT_URL=http://localhost:5173
+```
+
+## 📁 Project Structure
+
+```
+backend/
+├── controllers/  # Request handlers
+├── models/       # Database schemas
+├── routes/       # API endpoints
+├── middleware/   # Custom middleware
+├── lib/          # Utilities
+└── config/       # Configuration
 ```

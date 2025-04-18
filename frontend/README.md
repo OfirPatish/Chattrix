@@ -1,36 +1,26 @@
-# 🌟 Chattrix Frontend
+# ✨ Chattrix Frontend
 
-This is the frontend for the Chattrix real-time chat application, built with React and Vite.
+<div align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" alt="React"/>
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite" alt="Vite"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind"/>
+  <img src="https://img.shields.io/badge/Zustand-4-000000?style=for-the-badge" alt="Zustand"/>
+</div>
 
-## 📚 Technologies Used
+Modern and responsive frontend for the Chattrix real-time chat application.
 
-- ⚛️ React 19 for UI components
-- 🎨 TailwindCSS 4 & DaisyUI for styling
-- 🔄 Zustand for state management
-- ⚡ Vite for fast development
-- 📡 Socket.io client for real-time communication
-- 🚦 React Router v7 for routing
-- 🔔 React Hot Toast for notifications
-- 🖼️ DiceBear for avatar generation
+## 🎨 Features
 
-## 🏗️ Project Structure
+- Sleek, responsive UI with TailwindCSS and DaisyUI
+- Real-time messaging with Socket.io
+- Light and dark themes with theme-switch
+- State management with Zustand
+- Form handling and validation
+- Custom avatar generation
 
-- `components/` - Reusable UI components
-  - `Navbar.jsx` - Navigation component
-  - And more UI components for the chat interface
-- `pages/` - Application pages
-  - Various pages for login, registration, chat, profile, and settings
-- `store/` - State management with Zustand
-  - `useAuthStore.js` - Authentication state
-  - `useThemeStore.js` - Theme management
-  - Other state stores for application functionality
-- `lib/` - Utility functions
-  - API client configuration and helper utilities
-- `constants/` - Application constants
+## 🏃 Quick Start
 
-## 🚀 Development
-
-```
+```bash
 # Install dependencies
 npm install
 
@@ -39,22 +29,32 @@ npm run dev
 
 # Build for production
 npm run build
-
-# Preview production build
-npm run preview
-
-# Lint code
-npm run lint
 ```
 
-## 🔄 Features
+## 🧩 Key Components
 
-- User authentication (login/register)
-- Real-time messaging
-- Theme customization
-- Profile management
-- Avatar generation
+- **Authentication** - Login, register, and profile pages
+- **Chat Interface** - Real-time messaging UI
+- **Theme Switcher** - Toggle between light and dark modes
+- **Responsive Design** - Works on all device sizes
 
-## 🔗 Connection with Backend
+## 📁 Project Structure
 
-The frontend connects to the Chattrix backend API for data retrieval and real-time communication using Socket.io, providing a seamless chat experience.
+```
+frontend/
+├── src/
+│   ├── app/        # App configuration
+│   ├── features/   # Feature modules
+│   ├── shared/     # Reusable components
+│   ├── store/      # Zustand state stores
+│   └── lib/        # Utility functions
+└── public/         # Static assets
+```
+
+## 🔌 API Integration
+
+Communicates with the Chattrix backend API for:
+
+- User authentication
+- Message handling
+- Real-time updates via Socket.io

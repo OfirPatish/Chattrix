@@ -1,91 +1,88 @@
 # 💬 Chattrix
 
-A modern real-time chat application built with the MERN stack and enhanced with Socket.io for instant messaging. Experience seamless communication with a beautiful, responsive interface.
+A modern real-time chat application built with the MERN stack and Socket.io.
 
 <div align="center">
-  <strong>Built with modern web technologies for the best chat experience</strong>
+  <img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react" alt="React 19"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS"/>
+  <img src="https://img.shields.io/badge/MongoDB-4.4-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Socket.io-4-010101?style=for-the-badge&logo=socket.io" alt="Socket.io"/>
 </div>
 
 ## ✨ Features
 
-- 🔐 **Secure Authentication** - JWT-based user authentication and authorization
-- 💬 **Real-time Messaging** - Instant message delivery with Socket.io
-- 🟢 **Presence Detection** - See who's online with real-time status updates
-- 🖼️ **Custom Profiles** - Personalize your experience with custom avatars
-- 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
-- 🌙 **Theme Support** - Toggle between light and dark modes for comfortable viewing
-- 🔄 **State Management** - Efficient state handling with Zustand
-- 🛡️ **Security** - Comprehensive security features including rate limiting and secure headers
+- 🔐 **Secure Authentication** - User accounts protected with JWT
+- 💬 **Real-time Messaging** - Instant communication with Socket.io
+- 🟢 **Online Status** - See who's available in real-time
+- 🌙 **Dark/Light Mode** - Choose your preferred theme
+- 📱 **Responsive Design** - Works on all devices
+
+## 🚀 Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/OfirPatish/Chattrix.git
+cd Chattrix
+
+# Install dependencies
+npm run build
+
+# Start application
+npm start
+```
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 
-- ⚛️ **React 19** - Modern UI framework with the latest features
-- 🎨 **TailwindCSS 4 & DaisyUI** - Utility-first CSS and component library
-- 🔄 **Zustand** - Lightweight state management
-- ⚡ **Vite** - Next-generation frontend tooling
-- 📡 **Socket.io Client** - Real-time bidirectional communication
-- 🚦 **React Router v7** - Declarative routing for React
-- 🔔 **React Hot Toast** - Elegant notifications
-- 🖼️ **DiceBear** - Avatar generation API
+- React 19
+- TailwindCSS 4 & DaisyUI
+- Zustand (State Management)
+- Vite
+- Socket.io Client
 
 ### Backend
 
-- 📡 **Node.js & Express** - Fast, minimalist web framework
-- 🗃️ **MongoDB** - Flexible NoSQL database
-- 🔐 **JWT** - Secure authentication tokens
-- ⚡ **Socket.io** - Real-time event-based communication
-- 🛡️ **Helmet** - Security with HTTP headers
-- 🚧 **Rate Limiting** - API protection against abuse
-- 🔍 **Morgan** - HTTP request logger
-- 🗜️ **Compression** - Response optimization for faster loading
+- Node.js & Express
+- MongoDB
+- JWT Authentication
+- Socket.io
 
 ## 📋 Project Structure
 
 ```
 chattrix/
-├── frontend/           # React Vite application
-│   ├── src/
-│   │   ├── components/ # Reusable UI components
-│   │   ├── pages/      # Application pages
-│   │   ├── store/      # Zustand state management
-│   │   ├── lib/        # Utility functions
-│   │   └── constants/  # App constants
-│   └── public/         # Static assets
-└── backend/
-    ├── src/
-    │   ├── controllers/ # Request handlers
-    │   ├── models/      # Database models
-    │   ├── routes/      # API routes
-    │   ├── middleware/  # Custom middleware
-    │   ├── lib/         # Utility functions
-    │   └── config/      # Application configuration
-    └── .env             # Environment variables
+├── frontend/       # React application
+├── backend/        # Express API server
 ```
 
-## 🚀 Getting Started
+## ⚙️ Development
 
-### Prerequisites
+```bash
+# Run backend and frontend in development mode
+npm run dev
 
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas)
-- Git
+# Run only backend
+npm run dev:backend
 
-### Environment Setup
+# Run only frontend
+npm run dev:frontend
+```
 
-Create a `.env` file in the backend directory:
+## 🔧 Environment Setup
+
+Create a `.env` file in the backend directory with:
 
 ```
 # Database
 MONGO_URL=your_mongodb_connection_string
 
 # Server
-PORT=5000
+PORT=3000
 NODE_ENV=development
 
 # Authentication
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=your_secure_jwt_secret
 
 # External Services
 IMGBB_API_KEY=your_imgbb_api_key
@@ -94,98 +91,6 @@ IMGBB_API_KEY=your_imgbb_api_key
 CLIENT_URL=http://localhost:5173
 ```
 
-### Installation
-
-1. Clone the repository
-
-   ```bash
-   git clone https://github.com/OfirPatish/Chattrix.git
-   cd Chattrix
-   ```
-
-2. Install backend dependencies
-
-   ```bash
-   cd backend
-   npm install
-   ```
-
-3. Install frontend dependencies
-   ```bash
-   cd ../frontend
-   npm install
-   ```
-
-### Running the Application
-
-#### Development Mode
-
-1. Start the backend server
-
-   ```bash
-   cd backend
-   npm run dev
-   ```
-
-2. Start the frontend development server
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-
-#### Production Mode
-
-1. Build the frontend
-
-   ```bash
-   cd frontend
-   npm run build
-   ```
-
-2. Start the backend server (which will serve the frontend)
-
-   ```bash
-   cd backend
-   npm start
-   ```
-
-3. Alternatively, use the root scripts for combined operations:
-
-   ```bash
-   # Install all dependencies and build frontend
-   npm run build
-
-   # Start the application
-   npm start
-   ```
-
-## 🔒 Security
-
-Chattrix implements several security best practices:
-
-- JWT authentication with secure cookie storage
-- Input validation and sanitization
-- Rate limiting to prevent brute force attacks
-- Secure HTTP headers with Helmet
-- CORS configuration for API protection
-- Environment variable management for sensitive data
-
-## 👥 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgements
-
-- Icons by [heroicons](https://heroicons.com/)
-- UI components from [DaisyUI](https://daisyui.com/)
-- Avatar generation by [DiceBear](https://www.dicebear.com/)
+[MIT License](LICENSE)
