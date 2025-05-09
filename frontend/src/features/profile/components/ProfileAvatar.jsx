@@ -12,27 +12,27 @@ const ProfileAvatar = ({ profilePic }) => {
   const [avatars, setAvatars] = useState(getAllAvatars().slice(0, 8));
 
   return (
-    <div className="space-y-6">
-      <div className="card bg-base-100 transition-colors p-4 ">
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="avatar online">
-            <div className="w-20 h-20 rounded-full">
-              <img src={profilePic || "/avatar.png"} alt="Profile" />
-            </div>
+    <div className="space-y-3 sm:space-y-4 w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-base-200 rounded-lg">
+        <div className="avatar online">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
+            <img src={profilePic || "/avatar.png"} alt="Profile" className="mask mask-squircle" />
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="font-medium text-lg mb-1">Profile Picture</h3>
-            <p className="text-sm text-base-content/70 mb-3">Choose from our selection of Bottts avatars</p>
-            <Button primary size="sm" onClick={() => setShowAvatarSelector(!showAvatarSelector)}>
-              {showAvatarSelector ? "Close" : "Change Avatar"}
-            </Button>
-          </div>
+        </div>
+        <div className="flex-1 text-center sm:text-left">
+          <h3 className="font-medium text-base sm:text-lg mb-0.5 sm:mb-1">Profile Picture</h3>
+          <p className="text-xs sm:text-sm text-base-content/70 mb-2 sm:mb-3">
+            Choose from our selection of Bottts avatars
+          </p>
+          <Button primary size="sm" onClick={() => setShowAvatarSelector(!showAvatarSelector)}>
+            {showAvatarSelector ? "Close" : "Change Avatar"}
+          </Button>
         </div>
       </div>
 
       {/* Avatar selector - shows when toggle is active */}
       <div
-        className={`transition-all duration-300 overflow-hidden ${
+        className={`transition-all duration-300 overflow-hidden w-full ${
           showAvatarSelector ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >

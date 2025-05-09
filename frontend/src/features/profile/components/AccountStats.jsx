@@ -3,7 +3,7 @@ import { useAuthStore } from "../../../store/useAuthStore";
 
 /**
  * Account stats component
- * Modern, minimal horizontal card layout
+ * Clean, professional stat display with icons
  */
 const AccountStats = () => {
   const { authUser } = useAuthStore();
@@ -19,34 +19,47 @@ const AccountStats = () => {
     }).format(date);
   };
 
-  const totalMessages = authUser?.totalMessages || 1234;
+  // Stats data array
+  const stats = [
+    {
+      label: "Member Since",
+      value: formatMemberDate(authUser?.createdAt),
+      icon: <Clock className="w-5 h-5 text-primary" />,
+      iconBg: "bg-primary/10",
+    },
+    {
+      label: "Account Status",
+      value: "Active",
+      badge: { text: "Verified", color: "success" },
+      icon: <Shield className="w-5 h-5 text-success" />,
+      iconBg: "bg-success/10",
+    },
+    {
+      label: "Total Messages",
+      value: authUser?.totalMessages || "1,234",
+      icon: <MessageSquare className="w-5 h-5 text-accent" />,
+      iconBg: "bg-accent/10",
+    },
+  ];
 
   return (
-    <div className="bg-base-100 border border-base-200 rounded-xl shadow-sm mb-6 p-6 flex flex-col gap-4">
-      <h2 className="text-lg font-semibold text-base-content/80 mb-2">Account Stats</h2>
-      <div className="flex flex-col gap-3">
-        {/* Member Since */}
-        <div className="flex items-center gap-4 p-3 rounded-lg">
-          <span className="bg-primary/10 p-2 rounded-full">
-            <Clock className="w-6 h-6 text-primary" />
-          </span>
-          <div>
-            <div className="text-xs text-base-content/60">Member Since</div>
-            <div className="font-medium text-base-content">{formatMemberDate(authUser?.createdAt)}</div>
-          </div>
-        </div>
-        {/* Account Status */}
-        <div className="flex items-center gap-4 p-3 rounded-lg">
-          <span className="bg-success/10 p-2 rounded-full">
-            <Shield className="w-6 h-6 text-success" />
-          </span>
-          <div>
-            <div className="text-xs text-base-content/60">Account Status</div>
-            <div className="font-medium text-success flex items-center gap-2">
-              Active <span className="badge badge-success badge-outline text-xs">Verified</span>
+    <div className="bg-base-100 rounded-lg">
+      <div className="grid gap-4">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-4 p-3 rounded-lg bg-base-200/30 hover:bg-base-200/50 transition-colors"
+          >
+            <div className={`${stat.iconBg} p-2.5 rounded-full`}>{stat.icon}</div>
+            <div>
+              <div className="text-xs font-medium text-base-content/70">{stat.label}</div>
+              <div className="font-medium text-base-content flex items-center gap-2">
+                {stat.value}
+                {stat.badge && <span className={`badge badge-${stat.badge.color} badge-sm`}>{stat.badge.text}</span>}
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

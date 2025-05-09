@@ -3,16 +3,26 @@ import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "../store/useAuthStore";
 import { useThemeStore } from "../store/useThemeStore";
+import { useChatStore } from "../store/useChatStore";
 import Navbar from "../shared/components/Navbar";
 
 const AppLayout = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
+  const { setSelectedUser, selectedUser } = useChatStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Determine if user is on an authentication page
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+  const isChatPage = location.pathname === "/";
+
+  // Close chat when navigating away from chat page
+  useEffect(() => {
+    if (!isChatPage && selectedUser) {
+      setSelectedUser(null);
+    }
+  }, [isChatPage, setSelectedUser, selectedUser]);
 
   // Check authentication status when not on auth pages
   useEffect(() => {

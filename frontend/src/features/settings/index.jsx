@@ -31,7 +31,7 @@ const Settings = () => {
   const { authUser } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-base-200 pt-24 pb-8 px-4">
+    <div className="min-h-screen bg-base-200 pt-24 pb-8 px-4 w-full overflow-x-hidden">
       <div className="container mx-auto max-w-4xl">
         <div className="card bg-base-100 shadow-xl border border-base-300">
           <div className="card-body">
