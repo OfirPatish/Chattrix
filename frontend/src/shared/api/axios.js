@@ -6,7 +6,7 @@ import axios from "axios";
  */
 export const axiosInstance = axios.create({
   // Development base URL
-  baseURL: "http://localhost:3000/api",
+  baseURL: import.meta.env.MODE === "development" ? "http://localhost:3000/api" : "/api",
   // Include cookies in cross-origin requests
   withCredentials: true,
 });

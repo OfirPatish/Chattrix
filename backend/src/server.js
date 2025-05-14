@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
+import path from "path";
 
 // Application imports
 import { app, server } from "./lib/socket.js";
@@ -41,9 +42,18 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Response compression
 app.use(compression());
 
+const __dirname = path.resolve();
+
 // API routes with rate limiting
 app.use("/api/auth", apiLimiter, authRoute);
 app.use("/api/messages", apiLimiter, messageRoute);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../../frontend", "dist", "index.html"));
+  });
+}
 
 // Health check routes (no rate limiting)
 app.use("/health", healthRoute);
