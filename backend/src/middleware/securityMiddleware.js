@@ -4,8 +4,16 @@ import rateLimit from "express-rate-limit";
 /**
  * Security headers middleware using Helmet
  * Helps protect app from some well-known web vulnerabilities
+ * Customized CSP to allow images from trusted sources
  */
-export const securityHeaders = helmet();
+export const securityHeaders = helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https://i.ibb.co"],
+    },
+  },
+});
 
 /**
  * API rate limiting middleware
