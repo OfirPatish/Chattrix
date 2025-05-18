@@ -42,13 +42,13 @@ npm run build
 
 ```
 frontend/
+├── public/         # Static assets
 ├── src/
 │   ├── app/        # App configuration
 │   ├── features/   # Feature modules
+│   ├── lib/        # Utility functions
 │   ├── shared/     # Reusable components
-│   ├── store/      # Zustand state stores
-│   └── lib/        # Utility functions
-└── public/         # Static assets
+│   └── store/      # Zustand state stores
 ```
 
 ## 🔌 API Integration

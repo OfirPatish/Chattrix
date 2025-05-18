@@ -79,7 +79,6 @@ MONGO_URL=your_mongodb_connection_string
 
 # Server
 PORT=3000
-NODE_ENV=development
 
 # Authentication
 JWT_SECRET=your_secure_jwt_secret
@@ -87,6 +86,8 @@ JWT_SECRET=your_secure_jwt_secret
 # External Services
 IMGBB_API_KEY=your_imgbb_api_key
 
+# Environment
+NODE_ENV=development
 ```
 
 ## 📝 License
