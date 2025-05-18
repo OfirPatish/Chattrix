@@ -10,7 +10,7 @@ export const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https://i.ibb.co", "https://picsum.photos"],
+      imgSrc: ["'self'", "data:", "https://i.ibb.co", "https://picsum.photos", "https://fastly.picsum.photos"],
     },
   },
 });
