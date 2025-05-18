@@ -30,15 +30,9 @@ const AccountStats = () => {
     {
       label: "Account Status",
       value: "Active",
-      badge: { text: "Verified", color: "success" },
+      badge: { text: "Verified", color: "primary" },
       icon: <Shield className="w-5 h-5 text-success" />,
       iconBg: "bg-success/10",
-    },
-    {
-      label: "Total Messages",
-      value: authUser?.totalMessages || "1,234",
-      icon: <MessageSquare className="w-5 h-5 text-accent" />,
-      iconBg: "bg-accent/10",
     },
   ];
 

@@ -1,6 +1,6 @@
 import { Phone, Video, ArrowLeft } from "lucide-react";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { useChatStore } from "../../../store/useChatStore";
+import { useAuthStore } from "../../../../store/useAuthStore";
+import { useChatStore } from "../../../../store/useChatStore";
 import { useState, useEffect } from "react";
 
 const ChatHeader = () => {
@@ -52,40 +52,35 @@ const ChatHeader = () => {
             </button>
           )}
 
-          {/* Avatar */}
-          <div className="chat-image avatar relative">
-            <div className="w-8 sm:w-10 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1 sm:ring-offset-2">
+          {/* User avatar */}
+          <div className="avatar">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
               <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.username} />
             </div>
-            {/* Status icon overlay with DaisyUI tooltip */}
-            <span
-              className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${
-                isOnline ? "bg-success" : "bg-gray-400"
-              } tooltip tooltip-bottom`}
-              data-tip={isOnline ? "Online" : "Offline"}
-            ></span>
           </div>
 
           {/* User info */}
-          <div className="chat-header flex flex-col">
-            <h3 className="font-medium text-sm sm:text-base">{selectedUser.username}</h3>
+          <div>
+            <div className="font-medium text-sm sm:text-base">{selectedUser.username}</div>
+            <div className="text-xs flex items-center gap-1">
+              <span className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-success" : "bg-base-300"}`}></span>
+              <span>{isOnline ? "Online" : "Offline"}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Call/Video icons */}
-      <div className="flex-none flex items-center gap-1 sm:gap-2">
-        {/* Call icon */}
-        <button className="btn btn-circle btn-ghost btn-xs sm:btn-sm">
-          <Phone className="size-3 sm:size-4 text-success" />
+      {/* Action buttons */}
+      <div className="flex-none">
+        <button className="btn btn-ghost btn-circle">
+          <Phone size={18} />
         </button>
-
-        {/* Video icon */}
-        <button className="btn btn-circle btn-ghost btn-xs sm:btn-sm">
-          <Video className="size-3 sm:size-4 text-primary" />
+        <button className="btn btn-ghost btn-circle">
+          <Video size={18} />
         </button>
       </div>
     </div>
   );
 };
+
 export default ChatHeader;

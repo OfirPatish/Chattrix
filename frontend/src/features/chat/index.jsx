@@ -1,8 +1,8 @@
 import { useChatStore } from "../../store/useChatStore";
 import { useState, useEffect } from "react";
-import Sidebar from "./components/Sidebar";
-import EmptyChat from "./components/EmptyChat";
-import ChatContainer from "./components/ChatContainer";
+import Sidebar from "./components/SidebarView";
+import EmptyChat from "./components/messages/EmptyChat";
+import ChatContainer from "./components/messages/ChatContainer";
 
 const Home = () => {
   const { selectedUser } = useChatStore();
@@ -25,9 +25,13 @@ const Home = () => {
           <div className="card w-full bg-base-100 shadow-xl h-full overflow-hidden">
             <div className="card-body p-0 overflow-hidden">
               <div className="flex h-full rounded-lg overflow-hidden">
-                {/* Hide sidebar on mobile when chat is selected */}
-                {!(isMobileView && selectedUser) && <Sidebar />}
-                {!selectedUser ? <EmptyChat /> : <ChatContainer />}
+                {/* On mobile: Show sidebar ONLY when no chat is selected */}
+                {/* On desktop: Always show sidebar */}
+                {(!isMobileView || !selectedUser) && <Sidebar fullWidth={isMobileView && !selectedUser} />}
+
+                {/* On mobile: Show chat when selected, nothing when no chat */}
+                {/* On desktop: Show chat when selected, EmptyChat when no chat */}
+                {selectedUser ? <ChatContainer /> : !isMobileView && <EmptyChat />}
               </div>
             </div>
           </div>
@@ -36,4 +40,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;

@@ -45,7 +45,6 @@ const Profile = () => {
               <div className="text-center sm:text-left">
                 <h1 className="text-xl sm:text-2xl font-bold mb-2">{authUser?.username}</h1>
                 <div className="flex items-center justify-center sm:justify-start gap-2">
-                  <div className="badge badge-primary">Active</div>
                   <div className="badge badge-outline">Member</div>
                 </div>
               </div>

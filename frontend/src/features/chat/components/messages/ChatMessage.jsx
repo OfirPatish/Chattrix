@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { formatMessageTime } from "../../../shared/utils/utils";
+import { formatMessageTime } from "../../../../shared/utils/utils";
 import { ImageOff } from "lucide-react";
 
 /**
@@ -70,23 +70,8 @@ const ChatMessage = ({ message, isCurrentUser, forwardedRef }) => {
           </div>
         </div>
       </div>
-
-      {/* Image Preview Modal */}
-      <dialog className="modal" open={showImageModal && !imageError}>
-        <div className="modal-box max-w-4xl p-0 rounded-2xl">
-          <div className="flex justify-end p-2">
-            <button className="btn btn-circle btn-ghost btn-sm" onClick={() => setShowImageModal(false)}>
-              ✕
-            </button>
-          </div>
-          <div className="p-4">
-            <img src={message.imageUrl} alt="Full size attachment" className="w-full h-auto rounded-xl" />
-          </div>
-        </div>
-        <div className="modal-backdrop" onClick={() => setShowImageModal(false)}></div>
-      </dialog>
     </>
   );
 };
 
-export default React.forwardRef((props, ref) => <ChatMessage {...props} forwardedRef={ref} />);
+export default ChatMessage;
