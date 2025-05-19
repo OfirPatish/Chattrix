@@ -72,11 +72,11 @@ const ChatHeader = () => {
 
       {/* Action buttons */}
       <div className="flex-none">
-        <button className="btn btn-ghost btn-circle">
-          <Phone size={18} />
+        <button className="btn btn-circle btn-ghost btn-xs sm:btn-sm">
+          <Phone size={18} className="text-success" />
         </button>
-        <button className="btn btn-ghost btn-circle">
-          <Video size={18} />
+        <button className="btn btn-circle btn-ghost btn-xs sm:btn-sm">
+          <Video size={18} className="text-primary" />
         </button>
       </div>
     </div>

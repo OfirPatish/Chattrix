@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { formatMessageTime } from "../../../../shared/utils/utils";
 import { ImageOff } from "lucide-react";
+import ImageModal from "../../../../shared/components/ui/ImageModal";
 
 /**
  * Reusable chat message component
@@ -70,6 +71,11 @@ const ChatMessage = ({ message, isCurrentUser, forwardedRef }) => {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {message.imageUrl && !imageError && (
+        <ImageModal imageUrl={message.imageUrl} isOpen={showImageModal} onClose={() => setShowImageModal(false)} />
+      )}
     </>
   );
 };

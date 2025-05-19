@@ -124,12 +124,13 @@ const MessageInput = () => {
           <input
             ref={textInputRef}
             type="text"
-            className="input input-bordered input-sm sm:input-md w-full rounded-lg"
+            className="input input-bordered input-sm sm:input-md w-full rounded-lg text-base"
             placeholder="Type a message..."
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             disabled={isDisabled}
             maxLength={1000}
+            style={{ fontSize: "16px" }} /* Prevents zoom on iOS devices */
           />
           <input
             type="file"
