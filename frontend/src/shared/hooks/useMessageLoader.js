@@ -13,6 +13,7 @@ export const useMessageLoader = ({
 }) => {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [initialChatLoaded, setInitialChatLoaded] = useState(false);
   const prevMessagesLengthRef = useRef(0);
   const messageEndRef = useRef(null);
   const chatDivRef = useRef(null);
@@ -22,6 +23,7 @@ export const useMessageLoader = ({
   useEffect(() => {
     if (selectedUser?._id) {
       setPage(1);
+      setInitialChatLoaded(false);
       getMessages(selectedUser._id, 1, MESSAGES_PER_PAGE);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,15 +47,23 @@ export const useMessageLoader = ({
     }
   }, [messages, authUser, isCurrentUserMessage]);
 
-  // Scroll to bottom when a new chat is loaded (page === 1)
+  // Scroll to bottom only on the first load of a chat
   useEffect(() => {
-    // Only scroll to bottom on initial chat load (page === 1)
-    if (page === 1 && messages.length > 0 && messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+    // Only scroll to bottom on initial chat load (page === 1) and only once per chat
+    if (page === 1 && messages.length > 0 && !isMessagesLoading && !initialChatLoaded) {
+      // Use a slight delay to ensure DOM is fully updated
+      setTimeout(() => {
+        if (messageEndRef.current) {
+          messageEndRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+        } else if (chatDivRef.current) {
+          // Fallback scrolling if messageEndRef is not available
+          chatDivRef.current.scrollTop = chatDivRef.current.scrollHeight;
+        }
+        setInitialChatLoaded(true);
+      }, 100);
     }
-    // Only run when chat changes, page changes, or messages are loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUser?._id, page, messages.length]);
+  }, [selectedUser?._id, page, messages.length, isMessagesLoading, initialChatLoaded]);
 
   // Function to load more (older) messages
   const fetchMoreMessages = async () => {
@@ -85,6 +95,8 @@ export const useMessageLoader = ({
   const scrollToLatest = () => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    } else if (chatDivRef.current) {
+      chatDivRef.current.scrollTop = chatDivRef.current.scrollHeight;
     }
   };
 
@@ -105,5 +117,6 @@ export const useMessageLoader = ({
     handleScroll,
     scrollToLatest,
     showNoMoreMessages,
+    initialChatLoaded,
   };
 };

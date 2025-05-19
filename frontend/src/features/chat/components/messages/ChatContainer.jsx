@@ -1,6 +1,5 @@
 import React from "react";
 import { useChatStore } from "../../../../store/useChatStore";
-import { Loader2 } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "../../../../shared/components/skeletons/MessageSkeleton";
