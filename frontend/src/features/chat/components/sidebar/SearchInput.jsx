@@ -20,10 +20,11 @@ const SearchInput = ({
           <input
             type="text"
             placeholder="Search contacts..."
-            className="input input-bordered input-sm w-full"
+            className="input input-bordered input-sm w-full text-base"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus={isMobile}
+            style={{ fontSize: "16px" }} /* Prevents zoom on iOS devices */
           />
         </div>
         {searchQuery && (

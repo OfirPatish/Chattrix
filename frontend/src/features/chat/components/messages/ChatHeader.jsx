@@ -63,7 +63,7 @@ const ChatHeader = () => {
           <div>
             <div className="font-medium text-sm sm:text-base">{selectedUser.username}</div>
             <div className="text-xs flex items-center gap-1">
-              <span className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-success" : "bg-base-300"}`}></span>
+              <span className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-success" : "bg-error"}`}></span>
               <span>{isOnline ? "Online" : "Offline"}</span>
             </div>
           </div>
