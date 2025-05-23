@@ -37,7 +37,7 @@ const ChatPreview = () => (
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Avatar */}
               <div className="chat-image avatar">
-                <div className="w-8 sm:w-10 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1 sm:ring-offset-2">
+                <div className="w-8 sm:w-10 rounded-full">
                   <img src="/avatar.png" alt="Demo User" />
                 </div>
               </div>

@@ -24,7 +24,7 @@ const MessageItemSkeleton = ({ isCurrentUser }) => {
     <div className={`chat ${isCurrentUser ? "chat-end" : "chat-start"} animate-pulse mb-4`}>
       {!isCurrentUser && (
         <div className="chat-image avatar">
-          <div className="w-10 h-10 rounded-full skeleton ring ring-base-300 ring-offset-base-100 ring-offset-2"></div>
+          <div className="w-10 h-10 rounded-full skeleton"></div>
         </div>
       )}
 

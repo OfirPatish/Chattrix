@@ -48,7 +48,7 @@ const SidebarSkeleton = ({ fullWidth = false }) => {
           <div key={idx} className="w-full p-2 sm:p-3 flex items-center gap-3">
             {/* Avatar skeleton */}
             <div className="relative">
-              <div className="w-10 h-10 rounded-full skeleton ring ring-base-300 ring-offset-base-100 ring-offset-2" />
+              <div className="w-10 h-10 rounded-full skeleton" />
               {/* Online indicator - randomly show for some contacts */}
               {idx % 3 === 0 && (
                 <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full skeleton bg-success border-2 border-base-100" />

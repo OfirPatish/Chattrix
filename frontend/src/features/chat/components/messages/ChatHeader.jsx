@@ -54,7 +54,7 @@ const ChatHeader = () => {
 
           {/* User avatar */}
           <div className="avatar">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full">
               <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.username} />
             </div>
           </div>

@@ -34,7 +34,7 @@ const Profile = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6">
               <div className="relative">
                 <div className="avatar">
-                  <div className="w-20 sm:w-24 h-20 sm:h-24 rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
+                  <div className="w-20 sm:w-24 h-20 sm:h-24 rounded-full">
                     <img src={authUser?.profilePic || "/avatar.png"} alt="Profile" className="mask mask-squircle" />
                   </div>
                 </div>

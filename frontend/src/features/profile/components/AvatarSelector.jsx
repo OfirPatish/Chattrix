@@ -5,8 +5,9 @@ import { useAuthStore } from "../../../store/useAuthStore";
 /**
  * Avatar selector component for user profile
  * Allows users to view and select from available avatars
+ * Using flexible grid layout without empty spaces
  */
-const AvatarSelector = ({ avatars, onClose }) => {
+const AvatarSelector = ({ avatars }) => {
   const { updateProfile } = useAuthStore();
   const [updatingAvatar, setUpdatingAvatar] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -16,7 +17,7 @@ const AvatarSelector = ({ avatars, onClose }) => {
     try {
       setUpdatingAvatar(true);
       await updateProfile({ profilePic: avatarDataUri });
-      onClose();
+      toast.success("Avatar updated successfully");
     } catch (error) {
       toast.error("Failed to update avatar. Please try again.");
     } finally {
@@ -25,33 +26,53 @@ const AvatarSelector = ({ avatars, onClose }) => {
   };
 
   return (
-    <div className="bg-base-200 p-3 sm:p-4 rounded-lg w-full overflow-hidden">
-      <h3 className="text-xs sm:text-sm font-medium mb-3 sm:mb-4">Select an avatar:</h3>
+    <div className="pt-2">
+      {/* Flexible grid that adapts to content without empty spaces */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {avatars.map((avatar, index) => {
+          const isSelected = selectedIndex === index;
+          const isUpdating = updatingAvatar && selectedIndex === index;
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 w-full">
-        {avatars.map((avatar, index) => (
-          <div key={index} className="avatar-container relative flex justify-center">
+          return (
             <div
-              className={`avatar cursor-pointer transition-all duration-300 ${
-                selectedIndex === index ? "ring ring-primary ring-offset-2 ring-offset-base-200" : "hover:opacity-90"
+              key={index}
+              className={`p-3 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-md hover:scale-105 ${
+                isSelected
+                  ? "border-primary bg-primary/10 shadow-lg scale-105"
+                  : "border-base-300 hover:border-base-content/30"
               }`}
               onClick={async () => {
                 setSelectedIndex(index);
                 await handleAvatarSelect(avatar);
               }}
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 mask mask-squircle relative">
-                <img src={avatar} alt={`Avatar option ${index + 1}`} className="w-full h-full object-cover" />
-                {updatingAvatar && selectedIndex === index && (
-                  <div className="absolute inset-0 bg-base-100/70 flex items-center justify-center rounded">
-                    <span className="loading loading-spinner loading-sm sm:loading-md text-primary"></span>
+              <div className="flex flex-col items-center gap-2">
+                <div className="avatar">
+                  <div className="w-16 h-16 mask mask-squircle relative">
+                    <img src={avatar} alt={`Avatar option ${index + 1}`} className="w-full h-full object-cover" />
+                    {isUpdating && (
+                      <div className="absolute inset-0 bg-base-100/70 flex items-center justify-center rounded">
+                        <span className="loading loading-spinner loading-sm text-primary"></span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Selection indicator */}
+                <div className="flex items-center justify-center min-h-[24px]">
+                  {isSelected ? (
+                    <div className="badge badge-primary badge-sm gap-1">
+                      <span>✓</span>
+                      Selected
+                    </div>
+                  ) : (
+                    <div className="text-xs text-base-content/50 text-center">Option {index + 1}</div>
+                  )}
+                </div>
               </div>
             </div>
-            {selectedIndex === index && <div className="badge badge-primary badge-sm absolute -top-2 -right-2">✓</div>}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
