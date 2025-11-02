@@ -1,0 +1,36 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "@tanstack/react-query": "^5.90.6",
+    "axios": "^1.7.7",
+    "daisyui": "^5.4.2",
+    "lucide-react": "^0.552.0",
+    "motion": "^12.23.24",
+    "next": "16.0.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-error-boundary": "^6.0.0",
+    "react-hook-form": "^7.66.0",
+    "react-icons": "^5.5.0",
+    "socket.io-client": "^4.7.5",
+    "tailwindcss": "^4.1.16",
+    "use-debounce": "^10.0.6",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.1"
+  },
+  "browserslist": "> 1%"
+}
