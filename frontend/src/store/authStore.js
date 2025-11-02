@@ -94,6 +94,14 @@ const useAuthStore = create(
       },
 
       logout: () => {
+        // Import chatStore dynamically to avoid circular dependency
+        import("@/store/chatStore").then(({ default: useChatStore }) => {
+          useChatStore.getState().clearAll();
+        });
+        // Import socket disconnect dynamically
+        import("@/hooks/useSocket").then(({ disconnectSocket }) => {
+          disconnectSocket();
+        });
         set({
           user: null,
           token: null,

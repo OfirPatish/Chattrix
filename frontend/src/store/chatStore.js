@@ -246,6 +246,18 @@ const useChatStore = create((set, get) => ({
   clearMessages: () => {
     set({ messages: {}, pagination: {}, currentChat: null });
   },
+
+  clearAll: () => {
+    set({
+      chats: [],
+      currentChat: null,
+      messages: {},
+      pagination: {},
+      error: null,
+      isLoading: false,
+      isLoadingMore: false,
+    });
+  },
 }));
 
 export default useChatStore;

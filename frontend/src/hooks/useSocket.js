@@ -11,24 +11,51 @@ let socketInstance = null;
 let connectionState = { isConnected: false, listeners: new Set() };
 let connectionListenersSetup = false;
 let messageListenersSetup = false;
+let currentToken = null;
+
+// Cleanup and disconnect socket
+export const disconnectSocket = () => {
+  if (socketInstance) {
+    console.log("🔌 Disconnecting socket...");
+    socketInstance.removeAllListeners();
+    socketInstance.disconnect();
+    socketInstance = null;
+    connectionState.isConnected = false;
+    connectionState.listeners.forEach((setConnected) => setConnected(false));
+    connectionListenersSetup = false;
+    messageListenersSetup = false;
+    currentToken = null;
+  }
+};
 
 const getSocket = (token) => {
   if (!token) {
+    // If no token, disconnect existing socket
+    if (socketInstance) {
+      disconnectSocket();
+    }
     return null;
   }
 
-  // If socket exists and is connected, reuse it
-  if (socketInstance?.connected) {
+  // If token changed, disconnect old socket and create new one
+  if (currentToken && currentToken !== token && socketInstance) {
+    console.log("🔄 Token changed, reconnecting socket...");
+    disconnectSocket();
+  }
+
+  // If socket exists and is connected with same token, reuse it
+  if (socketInstance?.connected && currentToken === token) {
     return socketInstance;
   }
 
   // If socket exists but disconnected, reconnect
-  if (socketInstance && !socketInstance.connected) {
+  if (socketInstance && !socketInstance.connected && currentToken === token) {
     socketInstance.connect();
     return socketInstance;
   }
 
   // Create new socket instance
+  currentToken = token;
   socketInstance = io(SOCKET_URL, {
     auth: { token },
     transports: ["websocket", "polling"],
@@ -70,10 +97,14 @@ const getSocket = (token) => {
 export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(connectionState.isConnected);
   const { token, user } = useAuthStore();
-  const { addMessage, updateChat, updateMessage, currentChat } = useChatStore();
+  const { addMessage, updateChat, updateMessage } = useChatStore();
 
   useEffect(() => {
     if (!token || !user) {
+      // If no token/user, disconnect socket
+      if (socketInstance) {
+        disconnectSocket();
+      }
       return;
     }
 
@@ -95,8 +126,15 @@ export const useSocket = () => {
     if (!messageListenersSetup && socketInstance) {
       socketInstance.on("receive-message", (message) => {
         const { addMessage, updateChat } = useChatStore.getState();
-        addMessage(message.chat, message);
-        updateChat(message.chat, { lastMessage: message });
+        // Handle both ObjectId string and populated chat object
+        const chatId =
+          typeof message.chat === "string"
+            ? message.chat
+            : message.chat?._id || message.chat;
+        if (chatId) {
+          addMessage(chatId, message);
+          updateChat(chatId, { lastMessage: message });
+        }
       });
 
       socketInstance.on("message-read", ({ messageId, userId }) => {
@@ -120,13 +158,6 @@ export const useSocket = () => {
       connectionState.listeners.delete(setIsConnected);
     };
   }, [token, user]);
-
-  // Rejoin chat when currentChat changes
-  useEffect(() => {
-    if (socketInstance?.connected && currentChat?._id) {
-      socketInstance.emit("join-chat", currentChat._id);
-    }
-  }, [currentChat?._id, isConnected]);
 
   // Send message via socket
   const sendMessage = (
