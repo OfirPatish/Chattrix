@@ -60,6 +60,9 @@ app.get("/", (req, res) => {
   });
 });
 
+// Suppress favicon.ico requests (browsers auto-request this)
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
