@@ -80,6 +80,26 @@ Clean, scalable architecture with separation of concerns:
 **Backend:** `MONGO_URL`, `JWT_SECRET`, `PORT`, `FRONTEND_URL`  
 **Frontend:** `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SOCKET_URL`
 
+## 🚀 Deployment
+
+### Quick Deploy to MongoDB Atlas + Render
+
+For detailed step-by-step instructions, see **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+
+**Quick Steps:**
+
+1. **MongoDB Atlas:** Create cluster, database user, and get connection string
+2. **Render Backend:** Deploy backend service with MongoDB connection
+3. **Render Frontend:** Deploy frontend with backend URL configured
+4. **Update Environment Variables:** Set CORS and API URLs
+
+**Using Render Blueprint:**
+
+- Push `render.yaml` to your repository
+- In Render Dashboard, select "New Blueprint"
+- Render will create both services automatically
+- Manually configure environment variables in Render dashboard
+
 ## 📄 License
 
 MIT License
