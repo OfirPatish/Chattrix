@@ -2,6 +2,10 @@
 
 A modern, real-time chat application showcasing full-stack development with real-time communication, authentication, and modern UI/UX.
 
+## 🌐 Live Demo
+
+Check out the live application: **[https://chattrix-frontend-rgv4.onrender.com/](https://chattrix-frontend-rgv4.onrender.com/)**
+
 ## 🚀 Tech Stack
 
 **Frontend:** Next.js 16 | React 19 | TypeScript-ready | Tailwind CSS 4 | DaisyUI | Motion.dev  
