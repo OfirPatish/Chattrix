@@ -14,14 +14,37 @@ const useChatStore = create((set, get) => ({
   fetchChats: async () => {
     set({ isLoading: true, error: null });
     try {
+      console.log("Fetching chats...");
       const response = await chatAPI.getChats();
-      if (response.success) {
-        set({ chats: response.data, isLoading: false });
+      console.log("Chats response:", response);
+
+      if (response && response.success) {
+        set({ chats: response.data || [], isLoading: false, error: null });
+      } else {
+        // If response doesn't have success, still set loading to false
+        console.warn("Unexpected response format:", response);
+        set({
+          chats: [],
+          isLoading: false,
+          error:
+            response?.error || response?.message || "Failed to fetch chats",
+        });
       }
     } catch (error) {
+      console.error("Error fetching chats:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       set({
-        error: error.response?.data?.error || "Failed to fetch chats",
+        error:
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch chats",
         isLoading: false,
+        chats: [], // Ensure chats is set even on error
       });
     }
   },

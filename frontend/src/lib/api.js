@@ -1,4 +1,5 @@
 import axios from "axios";
+import useAuthStore from "@/store/authStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -11,7 +12,8 @@ const api = axios.create({
 
 // Add token to requests if available
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  // Get token from Zustand store (which persists to localStorage)
+  const token = useAuthStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -30,8 +32,8 @@ api.interceptors.response.use(
 
       if (!isAuthEndpoint) {
         // Only redirect to login for protected endpoints, not auth endpoints
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        // Clear auth via Zustand store (which handles localStorage)
+        useAuthStore.getState().logout();
         window.location.href = "/login";
       }
     }

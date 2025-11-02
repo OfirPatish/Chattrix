@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useChatStore from "@/store/chatStore";
 import useAuthStore from "@/store/authStore";
 import ChatListItem from "./ChatListItem";
@@ -17,16 +17,25 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
     fetchChats,
     isLoading,
     messages,
+    error,
   } = useChatStore();
   const { user } = useAuthStore();
   const { isConnected } = useSocket();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Only fetch if chats haven't been loaded yet
-    if (chats.length === 0 && !isLoading) {
-      fetchChats();
+    // Only fetch once if chats haven't been loaded yet and we're not currently loading
+    if (!hasFetched.current && chats.length === 0 && !isLoading) {
+      hasFetched.current = true;
+      // Use getState() to avoid dependency issues - Zustand functions are stable
+      useChatStore.getState().fetchChats();
     }
-  }, [fetchChats, chats.length, isLoading]);
+    // Reset the ref if chats are cleared (e.g., on logout)
+    if (chats.length > 0) {
+      hasFetched.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chats.length, isLoading]); // fetchChats is stable from Zustand, no need to include
 
   const handleChatClick = (chat) => {
     setCurrentChat(chat);
@@ -73,6 +82,12 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
       <div className="flex-1 overflow-y-auto">
         {isLoading && chats.length === 0 ? (
           <ChatListSkeleton count={3} />
+        ) : error ? (
+          <EmptyState
+            icon={<MessageCircle className="h-12 w-12 text-base-content/40" />}
+            title="Error loading chats"
+            description={error}
+          />
         ) : chats.length === 0 ? (
           <EmptyState
             icon={<MessageCircle className="h-12 w-12 text-base-content/40" />}
@@ -107,4 +122,3 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
     </div>
   );
 }
-
