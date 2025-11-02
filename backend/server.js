@@ -50,6 +50,16 @@ app.use("/api/users", userRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/messages", messageRoutes);
 
+// Root route (for health checks)
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Chattrix API Server",
+    api: "/api",
+    health: "/api/health",
+  });
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
