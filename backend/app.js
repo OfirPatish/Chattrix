@@ -10,8 +10,10 @@ const app = express();
 // Trust proxy (required for Render and other hosting platforms)
 app.set("trust proxy", 1);
 
-// Middleware
+// CORS middleware - must be first to handle preflight requests
 app.use(corsMiddleware);
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
