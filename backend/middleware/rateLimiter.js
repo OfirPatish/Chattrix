@@ -5,6 +5,11 @@ const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 100; // Max requests per window
 
 export const rateLimiter = (req, res, next) => {
+  // Skip rate limiting for OPTIONS requests (CORS preflight)
+  if (req.method === "OPTIONS") {
+    return next();
+  }
+
   // Get client IP - works with trust proxy setting
   // req.ip is available when trust proxy is enabled
   const clientId = req.ip || req.socket.remoteAddress || "unknown";

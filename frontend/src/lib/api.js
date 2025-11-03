@@ -13,7 +13,7 @@ const getBackendUrl = () => {
   return "http://localhost:3000";
 };
 
-const BACKEND_URL = getBackendUrl();
+const BACKEND_URL = getBackendUrl().replace(/\/$/, ""); // Remove trailing slash
 const API_URL = `${BACKEND_URL}/api`;
 
 const api = axios.create({
