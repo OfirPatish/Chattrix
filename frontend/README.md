@@ -32,8 +32,11 @@ npm run dev
 ```
 
 **Environment Variables:**
-- `NEXT_PUBLIC_API_URL` - Backend API URL
-- `NEXT_PUBLIC_SOCKET_URL` - Socket.io server URL
+- `NEXT_PUBLIC_BACKEND_URL` - Backend server URL (recommended, e.g., `https://api.example.com`)
+  - API endpoints will use `${BACKEND_URL}/api`
+  - Socket.io will use `${BACKEND_URL}`
+- `NEXT_PUBLIC_API_URL` - Backend API URL (legacy, for backward compatibility)
+- `NEXT_PUBLIC_SOCKET_URL` - Socket.io server URL (legacy, for backward compatibility)
 
 ## 📦 Key Libraries
 

@@ -3,8 +3,11 @@ import { io } from "socket.io-client";
 import useAuthStore from "@/store/authStore";
 import useChatStore from "@/store/chatStore";
 
+// Use single BACKEND_URL or fallback to SOCKET_URL for backward compatibility
 const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_SOCKET_URL ||
+  "http://localhost:3000";
 
 // Singleton socket instance
 let socketInstance = null;
