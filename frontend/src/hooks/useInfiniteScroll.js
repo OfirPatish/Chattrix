@@ -26,12 +26,14 @@ export function useInfiniteScroll({
     }
   }, [currentChatId]);
 
-  // Track when messages are loaded
+  // Track when messages are loaded (only check specific chat, not entire messages object)
   useEffect(() => {
     if (currentChatId && messages[currentChatId]?.length > 0) {
       messagesLoadedRef.current = true;
+    } else if (currentChatId && !messages[currentChatId]) {
+      messagesLoadedRef.current = false;
     }
-  }, [currentChatId, messages]);
+  }, [currentChatId, messages[currentChatId]?.length]); // Only depend on specific chat's length
 
   // Handle infinite scroll - load more when scrolling to top
   useEffect(() => {

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import useChatStore from "@/store/chatStore";
 import useAuthStore from "@/store/authStore";
-import { useSocket } from "@/hooks/useSocket";
 import { useMessageScroll } from "@/hooks/useMessageScroll";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useChatSwitching } from "@/hooks/chat/useChatSwitching";
+import { useMessageReading } from "@/hooks/chat/useMessageReading";
 import ChatHeader from "../ChatHeader";
 import MessageBubble from "./MessageBubble";
 import MessageSkeleton from "./MessageSkeleton";
@@ -23,58 +24,19 @@ export default function MessageList({ onNewChat }) {
     currentChat,
     messages,
     pagination,
-    isLoading,
+    isLoadingMessages,
     isLoadingMore,
-    fetchMessages,
-    fetchChatById,
     loadMoreMessages,
   } = useChatStore();
   const { user } = useAuthStore();
-  const { joinChat, markAsRead } = useSocket();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
-  const previousChatIdRef = useRef(null);
-  const scrollStateRef = useRef({
-    scrollHeight: 0,
-    lastMessageCount: 0,
-    isInitialLoad: false,
-    justLoadedOlder: false,
-    firstMessageId: null,
-  });
 
-  // Handle chat switching and initial scroll
-  useEffect(() => {
-    const chatId = currentChat?._id;
-    if (!chatId || chatId === previousChatIdRef.current) {
-      if (!chatId) previousChatIdRef.current = null;
-      return;
-    }
+  // Extract chat switching logic to custom hook
+  const { scrollStateRef } = useChatSwitching(currentChat);
 
-    previousChatIdRef.current = chatId;
-    scrollStateRef.current.lastMessageCount = 0;
-    scrollStateRef.current.firstMessageId = null;
-
-    fetchChatById(chatId);
-    joinChat(chatId);
-
-    const existingMessages = messages[chatId];
-    if (existingMessages?.length > 0) {
-      // Messages exist, scroll to bottom after render
-      scrollStateRef.current.isInitialLoad = true;
-      requestAnimationFrame(() => {
-        const container = messagesContainerRef.current;
-        if (container) {
-          container.scrollTop = container.scrollHeight;
-          scrollStateRef.current.isInitialLoad = false;
-        }
-      });
-    } else {
-      // Fetch messages
-      scrollStateRef.current.isInitialLoad = true;
-      fetchMessages(chatId, true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat?._id]);
+  // Extract message reading logic to custom hook
+  useMessageReading(currentChat);
 
   // Use custom hooks for scroll management
   useMessageScroll({
@@ -99,9 +61,12 @@ export default function MessageList({ onNewChat }) {
 
   // Get chat messages (must be before conditional returns for Rules of Hooks)
   // Memoize to prevent new array reference on every render
+  // Only depend on the specific chat's messages, not entire messages object
+  const currentChatId = currentChat?._id;
+  const currentChatMessages = messages[currentChatId];
   const chatMessages = useMemo(() => {
-    return messages[currentChat?._id] || [];
-  }, [messages, currentChat?._id]);
+    return currentChatMessages || [];
+  }, [currentChatMessages]);
 
   const paginationData = pagination[currentChat?._id];
   const hasMore = paginationData?.hasMore;
@@ -132,24 +97,6 @@ export default function MessageList({ onNewChat }) {
       };
     });
   }, [chatMessages, user?._id]);
-
-  // Mark messages as read when viewing chat
-  useEffect(() => {
-    const chatId = currentChat?._id;
-    const chatMessages = messages[chatId];
-    if (!chatId || !chatMessages?.length) return;
-
-    const userId = user?._id;
-    chatMessages
-      .filter(
-        (msg) =>
-          msg._id &&
-          msg.sender?._id !== userId &&
-          msg.sender !== userId &&
-          !msg.readBy?.some((r) => (r.user?._id || r.user) === userId)
-      )
-      .forEach((msg) => markAsRead(msg._id));
-  }, [currentChat?._id, messages, user?._id, markAsRead]);
 
   if (!currentChat) {
     return (
@@ -187,7 +134,7 @@ export default function MessageList({ onNewChat }) {
             )}
           </div>
         )}
-        {(isLoading && chatMessages.length === 0) ||
+        {(isLoadingMessages && chatMessages.length === 0) ||
         (currentChat?._id && !paginationData) ? (
           <MessageSkeleton count={5} />
         ) : chatMessages.length === 0 ? (

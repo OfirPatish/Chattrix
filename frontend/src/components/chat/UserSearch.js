@@ -1,81 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { userAPI } from "@/lib/api";
+import { useState } from "react";
 import useChatStore from "@/store/chatStore";
-import { getAvatarUrl } from "@/utils/avatarUtils";
-import Image from "next/image";
-import { Search, X, Frown, Loader2, User } from "lucide-react";
-import EmptyState from "./EmptyState";
+import { useUserSearch } from "@/hooks/chat/useUserSearch";
+import UserSearchInput from "./UserSearchInput";
+import UserList from "./UserList";
+import { Search, X, Frown, Loader2 } from "lucide-react";
 
 export default function UserSearch({ onClose }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const { createChat } = useChatStore();
-
-  useEffect(() => {
-    const searchUsers = async () => {
-      if (searchTerm.trim().length < 2) {
-        setUsers([]);
-        setError(null);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await userAPI.getUsers(searchTerm.trim());
-        if (response.success) {
-          setUsers(Array.isArray(response.data) ? response.data : []);
-        } else {
-          setError("Failed to search users");
-          setUsers([]);
-        }
-      } catch (error) {
-        console.error("Search error:", error);
-        setError(
-          error.response?.data?.message ||
-            "Failed to search users. Please try again."
-        );
-        setUsers([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const debounceTimer = setTimeout(searchUsers, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [searchTerm]);
+  const { searchTerm, setSearchTerm, users, isLoading, error, reset } =
+    useUserSearch();
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
 
   const handleSelectUser = async (userId) => {
-    if (!userId) return;
+    if (!userId || isCreatingChat) return;
 
+    setIsCreatingChat(true);
     try {
       const result = await createChat(userId);
       if (result.success) {
         onClose();
-        // Reset search state when closing
-        setSearchTerm("");
-        setUsers([]);
-        setError(null);
+        reset();
       } else {
-        setError(result.error || "Failed to create chat");
+        // Error will be handled by the error state in useUserSearch
+        console.error("Create chat error:", result.error);
       }
     } catch (error) {
       console.error("Create chat error:", error);
-      setError("Failed to start conversation. Please try again.");
+    } finally {
+      setIsCreatingChat(false);
     }
   };
 
   const handleBackdropClick = () => {
     onClose();
-    setSearchTerm("");
-    setUsers([]);
-    setError(null);
+    reset();
   };
 
   return (
@@ -94,17 +54,11 @@ export default function UserSearch({ onClose }) {
         </div>
 
         <div className="p-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              className="input input-bordered w-full pl-12 rounded-2xl focus:outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
-            />
-          </div>
+          <UserSearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search users..."
+          />
         </div>
 
         <div className="px-6 pb-6 max-h-96 overflow-y-auto min-h-[300px]">
@@ -134,13 +88,7 @@ export default function UserSearch({ onClose }) {
                   <X className="h-10 w-10 text-error" />
                 </div>
                 <p className="text-base font-medium text-error mb-1">{error}</p>
-                <button
-                  onClick={() => {
-                    setError(null);
-                    setSearchTerm("");
-                  }}
-                  className="btn btn-sm btn-outline mt-2"
-                >
+                <button onClick={reset} className="btn btn-sm btn-outline mt-2">
                   Try Again
                 </button>
               </div>
@@ -164,52 +112,11 @@ export default function UserSearch({ onClose }) {
               )}
 
             {!isLoading && !error && users.length > 0 && (
-              <div className="space-y-2 py-2">
-                {users.map((user) => {
-                  if (!user || !user._id) return null;
-
-                  return (
-                    <button
-                      key={user._id}
-                      onClick={() => handleSelectUser(user._id)}
-                      className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-base-200 transition-colors text-left active:scale-[0.98]"
-                      disabled={isLoading}
-                    >
-                      <div className="avatar placeholder">
-                        {getAvatarUrl(user.avatar, user.username) ? (
-                          <div className="w-12 h-12 rounded-full overflow-hidden shadow-md">
-                            <Image
-                              src={getAvatarUrl(user.avatar, user.username)}
-                              alt={user.username || "Avatar"}
-                              width={48}
-                              height={48}
-                              className="w-full h-full object-cover"
-                              unoptimized
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content shadow-md flex items-center justify-center">
-                            <User className="h-6 w-6" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate text-base">
-                          {user.username || "Unknown User"}
-                        </div>
-                        <div className="text-sm text-base-content/70 truncate">
-                          {user.email || ""}
-                        </div>
-                      </div>
-                      <span className={`text-xs flex-shrink-0 ${
-                        user.isOnline ? "text-success" : "text-base-content/50"
-                      }`}>
-                        {user.isOnline ? "Online" : "Offline"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              <UserList
+                users={users}
+                onSelectUser={handleSelectUser}
+                isLoading={isCreatingChat}
+              />
             )}
           </div>
         </div>

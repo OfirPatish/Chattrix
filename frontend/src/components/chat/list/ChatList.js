@@ -15,7 +15,6 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
     currentChat,
     setCurrentChat,
     fetchChats,
-    isLoading,
     messages,
     error,
     hasInitiallyFetched,
@@ -25,10 +24,11 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
 
   useEffect(() => {
     // Only fetch once if initial fetch hasn't been attempted yet
-    if (!hasInitiallyFetched && !isLoading) {
+    // Don't check isLoading here - we only care about hasInitiallyFetched
+    if (!hasInitiallyFetched) {
       fetchChats();
     }
-  }, [hasInitiallyFetched, isLoading, fetchChats]);
+  }, [hasInitiallyFetched, fetchChats]);
 
   const handleChatClick = (chat) => {
     setCurrentChat(chat);
@@ -73,7 +73,7 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {isLoading || !hasInitiallyFetched ? (
+        {!hasInitiallyFetched ? (
           <ChatListSkeleton count={3} />
         ) : error ? (
           <EmptyState
