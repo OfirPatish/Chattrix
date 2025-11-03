@@ -13,71 +13,64 @@ export function useMessageScroll({
   isLoadingMore,
   currentChatId,
   userId,
-  isInitialLoadRef,
-  justLoadedOlderMessagesRef,
-  firstMessageIdRef,
-  lastMessageCountRef,
+  scrollStateRef,
 }) {
   useEffect(() => {
-    if (!messagesContainerRef.current) return;
-
     const container = messagesContainerRef.current;
+    if (!container || isLoadingMore || !chatMessages?.length) return;
 
-    // Don't scroll at all when loading older messages
-    if (isLoadingMore) {
-      return;
-    }
-
-    if (!chatMessages?.length) return;
-
+    const state = scrollStateRef.current;
     const messageCount = chatMessages.length;
     const firstMessageId = chatMessages[0]?._id;
     const lastMessage = chatMessages[messageCount - 1];
     const isOwnMessage =
       lastMessage?.sender?._id === userId || lastMessage?.sender === userId;
 
-    const updateRefs = () => {
-      lastMessageCountRef.current = messageCount;
-      firstMessageIdRef.current = firstMessageId;
-    };
-
     // Initial load - jump to bottom instantly
-    if (isInitialLoadRef.current) {
+    if (state.isInitialLoad) {
       requestAnimationFrame(() => {
         container.scrollTop = container.scrollHeight;
-        isInitialLoadRef.current = false;
+        state.isInitialLoad = false;
       });
-      updateRefs();
+      state.lastMessageCount = messageCount;
+      state.firstMessageId = firstMessageId;
       return;
     }
 
     // Just loaded older messages - don't scroll
-    if (justLoadedOlderMessagesRef.current) {
-      justLoadedOlderMessagesRef.current = false;
-      updateRefs();
+    if (state.justLoadedOlder) {
+      state.justLoadedOlder = false;
+      state.lastMessageCount = messageCount;
+      state.firstMessageId = firstMessageId;
       return;
     }
 
-    // Check if viewing older messages (prepended or near top)
-    const olderMessagesLoaded = firstMessageIdRef.current && firstMessageId !== firstMessageIdRef.current;
+    // Check if viewing older messages
+    const olderMessagesLoaded =
+      state.firstMessageId && firstMessageId !== state.firstMessageId;
     const isNearTop = container.scrollTop < 500;
-    const isNewMessage = messageCount > lastMessageCountRef.current;
-    const viewingOlderMessages = olderMessagesLoaded || (isNearTop && isNewMessage && !isOwnMessage);
+    const isNewMessage = messageCount > state.lastMessageCount;
+    const viewingOlderMessages =
+      olderMessagesLoaded || (isNearTop && isNewMessage && !isOwnMessage);
 
     if (viewingOlderMessages) {
-      updateRefs();
+      state.lastMessageCount = messageCount;
+      state.firstMessageId = firstMessageId;
       return;
     }
 
     // Scroll to bottom for own messages or new messages when near bottom
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      200;
     if (isOwnMessage || (isNearBottom && isNewMessage)) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 0);
     }
 
-    updateRefs();
+    state.lastMessageCount = messageCount;
+    state.firstMessageId = firstMessageId;
   }, [
     chatMessages,
     isLoadingMore,
@@ -85,9 +78,6 @@ export function useMessageScroll({
     userId,
     messagesContainerRef,
     messagesEndRef,
-    isInitialLoadRef,
-    justLoadedOlderMessagesRef,
-    firstMessageIdRef,
-    lastMessageCountRef,
+    scrollStateRef,
   ]);
 }

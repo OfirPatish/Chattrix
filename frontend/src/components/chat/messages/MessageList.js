@@ -34,11 +34,13 @@ export default function MessageList({ onNewChat }) {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const previousChatIdRef = useRef(null);
-  const scrollHeightRef = useRef(0);
-  const lastMessageCountRef = useRef(0);
-  const isInitialLoadRef = useRef(false);
-  const justLoadedOlderMessagesRef = useRef(false);
-  const firstMessageIdRef = useRef(null);
+  const scrollStateRef = useRef({
+    scrollHeight: 0,
+    lastMessageCount: 0,
+    isInitialLoad: false,
+    justLoadedOlder: false,
+    firstMessageId: null,
+  });
 
   // Handle chat switching and initial scroll
   useEffect(() => {
@@ -49,8 +51,8 @@ export default function MessageList({ onNewChat }) {
     }
 
     previousChatIdRef.current = chatId;
-    lastMessageCountRef.current = 0;
-    firstMessageIdRef.current = null;
+    scrollStateRef.current.lastMessageCount = 0;
+    scrollStateRef.current.firstMessageId = null;
 
     fetchChatById(chatId);
     joinChat(chatId);
@@ -58,19 +60,17 @@ export default function MessageList({ onNewChat }) {
     const existingMessages = messages[chatId];
     if (existingMessages?.length > 0) {
       // Messages exist, scroll to bottom after render
-      isInitialLoadRef.current = true;
+      scrollStateRef.current.isInitialLoad = true;
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const container = messagesContainerRef.current;
-          if (container) {
-            container.scrollTop = container.scrollHeight;
-            isInitialLoadRef.current = false;
-          }
-        });
+        const container = messagesContainerRef.current;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+          scrollStateRef.current.isInitialLoad = false;
+        }
       });
     } else {
       // Fetch messages
-      isInitialLoadRef.current = true;
+      scrollStateRef.current.isInitialLoad = true;
       fetchMessages(chatId, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,10 +84,7 @@ export default function MessageList({ onNewChat }) {
     isLoadingMore,
     currentChatId: currentChat?._id,
     userId: user?._id,
-    isInitialLoadRef,
-    justLoadedOlderMessagesRef,
-    firstMessageIdRef,
-    lastMessageCountRef,
+    scrollStateRef,
   });
 
   useInfiniteScroll({
@@ -96,12 +93,8 @@ export default function MessageList({ onNewChat }) {
     pagination,
     isLoadingMore,
     loadMoreMessages,
-    scrollHeightRef,
-    justLoadedOlderMessagesRef,
-    firstMessageIdRef,
-    lastMessageCountRef,
+    scrollStateRef,
     messages,
-    isInitialLoadRef,
   });
 
   // Get chat messages (must be before conditional returns for Rules of Hooks)
@@ -143,21 +136,20 @@ export default function MessageList({ onNewChat }) {
   // Mark messages as read when viewing chat
   useEffect(() => {
     const chatId = currentChat?._id;
-    const chatMessagesForRead = messages[chatId];
-    if (!chatId || !Array.isArray(chatMessagesForRead)) return;
+    const chatMessages = messages[chatId];
+    if (!chatId || !chatMessages?.length) return;
 
     const userId = user?._id;
-    chatMessagesForRead.forEach((msg) => {
-      const isOwnMessage = msg.sender?._id === userId || msg.sender === userId;
-      const isRead = msg.readBy?.some(
-        (r) => (r.user?._id || r.user) === userId
-      );
-      if (!isOwnMessage && !isRead && msg._id) {
-        markAsRead(msg._id);
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat?._id, messages, user?._id]);
+    chatMessages
+      .filter(
+        (msg) =>
+          msg._id &&
+          msg.sender?._id !== userId &&
+          msg.sender !== userId &&
+          !msg.readBy?.some((r) => (r.user?._id || r.user) === userId)
+      )
+      .forEach((msg) => markAsRead(msg._id));
+  }, [currentChat?._id, messages, user?._id, markAsRead]);
 
   if (!currentChat) {
     return (
@@ -195,7 +187,8 @@ export default function MessageList({ onNewChat }) {
             )}
           </div>
         )}
-        {isLoading && chatMessages.length === 0 ? (
+        {(isLoading && chatMessages.length === 0) ||
+        (currentChat?._id && !paginationData) ? (
           <MessageSkeleton count={5} />
         ) : chatMessages.length === 0 ? (
           <EmptyState

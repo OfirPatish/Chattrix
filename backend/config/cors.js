@@ -4,22 +4,25 @@ import cors from "cors";
 const frontendUrl = process.env.FRONTEND_URL;
 
 // Validate that if credentials are needed, origin must be specified
-if (!frontendUrl && process.env.NODE_ENV === "production") {
-  console.warn(
-    "⚠️  FRONTEND_URL not set in production - CORS credentials disabled"
-  );
+if (!frontendUrl) {
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      "⚠️  FRONTEND_URL not set in production - CORS credentials disabled"
+    );
+  } else {
+    // Only log once in development, not on every request
+    console.log(
+      "⚠️  CORS: FRONTEND_URL not set, allowing all origins (development mode)"
+    );
+  }
 }
 
 export const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) {
-      console.log("✅ CORS: Request with no origin (allowed)");
       return callback(null, true);
     }
-
-    // Log all CORS requests for debugging
-    console.log(`🔍 CORS Check: Origin="${origin}", Expected="${frontendUrl}"`);
 
     // If FRONTEND_URL is set, only allow that origin (normalize URLs)
     if (frontendUrl) {
@@ -27,9 +30,9 @@ export const corsOptions = {
       const normalizedFrontendUrl = frontendUrl.replace(/\/$/, ""); // Remove trailing slash
 
       if (normalizedOrigin === normalizedFrontendUrl) {
-        console.log("✅ CORS: Origin matched, allowing request");
         callback(null, true);
       } else {
+        // Only log errors, not successful matches
         console.error(
           `❌ CORS Error: Origin "${origin}" not allowed. Expected: "${frontendUrl}"`
         );
@@ -42,8 +45,7 @@ export const corsOptions = {
         );
       }
     } else {
-      // Development: allow all origins
-      console.log("⚠️  CORS: FRONTEND_URL not set, allowing all origins");
+      // Development: allow all origins (only log once on startup, not per request)
       callback(null, true);
     }
   },

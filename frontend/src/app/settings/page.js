@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useAuthStore from "@/store/authStore";
 import { userAPI } from "@/lib/api";
+import { getAvatarUrl, generateAvatarOptions } from "@/utils/avatarUtils";
+import Image from "next/image";
 import {
   ArrowLeft,
   User as UserIcon,
@@ -12,6 +14,7 @@ import {
   Settings,
   ShieldCheck,
   Bell,
+  RefreshCw,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -22,8 +25,11 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
     username: "",
     email: "",
+    avatar: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [avatarOptions, setAvatarOptions] = useState([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,9 +48,18 @@ export default function SettingsPage() {
       setProfileData({
         username: user.username || "",
         email: user.email || "",
+        avatar: user.avatar || "",
       });
     }
   }, [user, isEditing]);
+
+  // Generate avatar options when selector opens
+  useEffect(() => {
+    if (showAvatarSelector && user?.username) {
+      const options = generateAvatarOptions(user.username, 9);
+      setAvatarOptions(options);
+    }
+  }, [showAvatarSelector, user?.username]);
 
   const handleUpdateProfile = async () => {
     const startTime = performance.now();
@@ -54,6 +69,7 @@ export default function SettingsPage() {
     try {
       const response = await userAPI.updateProfile({
         username: profileData.username,
+        avatar: profileData.avatar,
       });
 
       // Ensure minimum loading duration of 800ms for better UX
@@ -117,8 +133,32 @@ export default function SettingsPage() {
         <div className="bg-base-100/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg border border-base-300 p-4 sm:p-5 md:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content shadow-lg ring-2 sm:ring-4 ring-base-100 flex-shrink-0">
-                <UserIcon className="h-8 w-8 sm:h-10 sm:w-10" />
+              <div className="relative">
+                {getAvatarUrl(user?.avatar, user?.username) ? (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden shadow-lg ring-2 sm:ring-4 ring-base-100 flex-shrink-0">
+                    <Image
+                      src={getAvatarUrl(user?.avatar, user?.username)}
+                      alt={user?.username || "Avatar"}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content shadow-lg ring-2 sm:ring-4 ring-base-100 flex-shrink-0">
+                    <UserIcon className="h-8 w-8 sm:h-10 sm:w-10" />
+                  </div>
+                )}
+                {isEditing && (
+                  <button
+                    onClick={() => setShowAvatarSelector(true)}
+                    className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-primary-content flex items-center justify-center shadow-md hover:bg-primary-focus transition-colors"
+                    title="Change avatar"
+                  >
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </button>
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="text-lg sm:text-xl font-bold text-base-content truncate">
@@ -136,6 +176,7 @@ export default function SettingsPage() {
                   setProfileData({
                     username: user?.username || "",
                     email: user?.email || "",
+                    avatar: user?.avatar || "",
                   });
                   setIsEditing(true);
                 }}
@@ -165,7 +206,7 @@ export default function SettingsPage() {
                         username: e.target.value,
                       })
                     }
-                    className="input input-bordered w-full pl-10 sm:pl-12 pr-3 sm:pr-4 text-sm sm:text-base focus:input-primary text-base-content placeholder:text-base-content/50"
+                    className="input input-bordered w-full pl-10 sm:pl-12 pr-3 sm:pr-4 text-sm sm:text-base focus:outline-none text-base-content placeholder:text-base-content/50"
                     placeholder="Your username"
                     autoFocus
                   />
@@ -192,13 +233,65 @@ export default function SettingsPage() {
                     setProfileData({
                       username: user?.username || "",
                       email: user?.email || "",
+                      avatar: user?.avatar || "",
                     });
+                    setShowAvatarSelector(false);
                   }}
                   className="btn btn-outline w-full sm:w-auto"
                 >
                   Cancel
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Avatar Selector Modal */}
+          {showAvatarSelector && (
+            <div className="pt-4 border-t border-base-300 mt-4">
+              <h3 className="text-sm font-semibold text-base-content mb-3">
+                Choose Avatar
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {avatarOptions.map((avatarUrl, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setProfileData({
+                        ...profileData,
+                        avatar: avatarUrl,
+                      });
+                      setShowAvatarSelector(false);
+                    }}
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      profileData.avatar === avatarUrl
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-base-300 hover:border-primary/50"
+                    }`}
+                  >
+                    <Image
+                      src={avatarUrl}
+                      alt={`Avatar option ${index + 1}`}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => {
+                  // Generate new random options
+                  if (user?.username) {
+                    const newOptions = generateAvatarOptions(user.username, 9);
+                    setAvatarOptions(newOptions);
+                  }
+                }}
+                className="btn btn-ghost btn-sm mt-3 w-full"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Generate New Options
+              </button>
             </div>
           )}
         </div>

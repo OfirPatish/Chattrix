@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authStore";
+import { getAvatarUrl } from "@/utils/avatarUtils";
+import Image from "next/image";
 import { UserPlus, LogOut, Settings, ChevronDown, User } from "lucide-react";
 
 export default function UserProfileDropdown({ onNewChat }) {
@@ -40,14 +42,30 @@ export default function UserProfileDropdown({ onNewChat }) {
   };
 
   return (
-    <details ref={detailsRef} className="dropdown dropdown-end dropdown-bottom group">
+    <details
+      ref={detailsRef}
+      className="dropdown dropdown-end dropdown-bottom group"
+    >
       <summary className="btn btn-ghost gap-2 rounded-full cursor-pointer list-none">
         <div className="avatar placeholder">
-          <div className="bg-gradient-to-br from-primary to-secondary text-primary-content rounded-full w-8 h-8 ring-2 ring-base-100 shadow-md flex items-center justify-center">
-            <User className="h-4 w-4" />
-          </div>
+          {getAvatarUrl(user?.avatar, user?.username) ? (
+            <div className="rounded-full w-8 h-8 ring-2 ring-base-100 shadow-md overflow-hidden">
+              <Image
+                src={getAvatarUrl(user?.avatar, user?.username)}
+                alt={user?.username || "Avatar"}
+                width={32}
+                height={32}
+                className="w-full h-full object-cover"
+                unoptimized
+              />
+            </div>
+          ) : (
+            <div className="bg-gradient-to-br from-primary to-secondary text-primary-content rounded-full w-8 h-8 ring-2 ring-base-100 shadow-md flex items-center justify-center">
+              <User className="h-4 w-4" />
+            </div>
+          )}
         </div>
-        <span className="font-medium text-sm text-base-content hidden sm:inline">
+        <span className="font-medium text-sm text-base-content hidden sm:inline truncate max-w-[120px]">
           {user?.username}
         </span>
         <ChevronDown className="h-4 w-4 text-base-content/60 transition-transform group-open:rotate-180 hidden sm:inline" />

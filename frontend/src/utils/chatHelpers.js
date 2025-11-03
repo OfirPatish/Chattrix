@@ -42,10 +42,14 @@ export const formatTime = (date) => {
   }
 };
 
+// Helper to get sender ID (handles both populated and unpopulated sender)
+const getSenderId = (sender) => sender?._id || sender;
+
 export const shouldShowAvatar = (message, prevMessage, currentUserId) => {
-  if (message.sender._id === currentUserId) return false;
+  const senderId = getSenderId(message.sender);
+  if (senderId === currentUserId) return false;
   if (!prevMessage) return true;
-  if (prevMessage.sender._id !== message.sender._id) return true;
+  if (getSenderId(prevMessage.sender) !== senderId) return true;
   const timeDiff =
     new Date(message.createdAt) - new Date(prevMessage.createdAt);
   return timeDiff > 300000; // 5 minutes
@@ -57,8 +61,9 @@ export const shouldGroupWithPrevious = (
   currentUserId
 ) => {
   if (!prevMessage) return false;
-  // Group if same sender (for both own and other messages)
-  if (message.sender._id !== prevMessage.sender._id) return false;
+  // Group if same sender
+  if (getSenderId(message.sender) !== getSenderId(prevMessage.sender))
+    return false;
   const timeDiff =
     new Date(message.createdAt) - new Date(prevMessage.createdAt);
   // Group messages sent within 2 minutes of each other

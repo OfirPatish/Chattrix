@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { userAPI } from "@/lib/api";
 import useChatStore from "@/store/chatStore";
+import { getAvatarUrl } from "@/utils/avatarUtils";
+import Image from "next/image";
 import { Search, X, Frown, Loader2, User } from "lucide-react";
 import EmptyState from "./EmptyState";
 
@@ -97,7 +99,7 @@ export default function UserSearch({ onClose }) {
             <input
               type="text"
               placeholder="Search users..."
-              className="input input-bordered w-full pl-12 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary"
+              className="input input-bordered w-full pl-12 rounded-2xl focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               autoFocus
@@ -173,12 +175,22 @@ export default function UserSearch({ onClose }) {
                       className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-base-200 transition-colors text-left active:scale-[0.98]"
                       disabled={isLoading}
                     >
-                      <div className="avatar placeholder relative">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content shadow-md flex items-center justify-center">
-                          <User className="h-6 w-6" />
-                        </div>
-                        {user.isOnline && (
-                          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success border-2 border-base-100 rounded-full"></div>
+                      <div className="avatar placeholder">
+                        {getAvatarUrl(user.avatar, user.username) ? (
+                          <div className="w-12 h-12 rounded-full overflow-hidden shadow-md">
+                            <Image
+                              src={getAvatarUrl(user.avatar, user.username)}
+                              alt={user.username || "Avatar"}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content shadow-md flex items-center justify-center">
+                            <User className="h-6 w-6" />
+                          </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -189,11 +201,11 @@ export default function UserSearch({ onClose }) {
                           {user.email || ""}
                         </div>
                       </div>
-                      {user.isOnline && (
-                        <span className="badge badge-success badge-sm flex-shrink-0">
-                          Online
-                        </span>
-                      )}
+                      <span className={`text-xs flex-shrink-0 ${
+                        user.isOnline ? "text-success" : "text-base-content/50"
+                      }`}>
+                        {user.isOnline ? "Online" : "Offline"}
+                      </span>
                     </button>
                   );
                 })}

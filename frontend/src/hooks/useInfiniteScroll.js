@@ -12,12 +12,8 @@ export function useInfiniteScroll({
   pagination,
   isLoadingMore,
   loadMoreMessages,
-  scrollHeightRef,
-  justLoadedOlderMessagesRef,
-  firstMessageIdRef,
-  lastMessageCountRef,
+  scrollStateRef,
   messages,
-  isInitialLoadRef,
 }) {
   const hasScrolledRef = useRef(false);
   const messagesLoadedRef = useRef(false);
@@ -43,11 +39,10 @@ export function useInfiniteScroll({
     if (!container || !currentChatId) return;
 
     const handleScroll = () => {
-      // Track that user has scrolled (not just programmatic scroll)
       hasScrolledRef.current = true;
 
       // Don't trigger during initial load or before messages are loaded
-      if (isInitialLoadRef?.current || !messagesLoadedRef.current) {
+      if (scrollStateRef.current.isInitialLoad || !messagesLoadedRef.current) {
         return;
       }
 
@@ -59,7 +54,7 @@ export function useInfiniteScroll({
         paginationData?.hasMore &&
         !isLoadingMore
       ) {
-        scrollHeightRef.current = container.scrollHeight;
+        scrollStateRef.current.scrollHeight = container.scrollHeight;
         loadMoreMessages(currentChatId);
       }
     };
@@ -72,29 +67,27 @@ export function useInfiniteScroll({
     isLoadingMore,
     loadMoreMessages,
     messagesContainerRef,
-    scrollHeightRef,
-    isInitialLoadRef,
+    scrollStateRef,
   ]);
 
   // Preserve scroll position when loading older messages
   useEffect(() => {
     const container = messagesContainerRef.current;
     const chatMessages = messages[currentChatId];
+    const state = scrollStateRef.current;
 
-    if (container && isLoadingMore === false && scrollHeightRef.current > 0) {
-      // Use requestAnimationFrame to ensure DOM is updated before scrolling
+    if (container && !isLoadingMore && state.scrollHeight > 0) {
       requestAnimationFrame(() => {
         const newScrollHeight = container.scrollHeight;
-        const scrollDiff = newScrollHeight - scrollHeightRef.current;
+        const scrollDiff = newScrollHeight - state.scrollHeight;
         container.scrollTop = scrollDiff;
-        scrollHeightRef.current = 0;
-        // Mark that we just loaded older messages to prevent scrolling to bottom
-        justLoadedOlderMessagesRef.current = true;
+        state.scrollHeight = 0;
+        state.justLoadedOlder = true;
 
-        // Update refs to prevent detection as new messages
-        if (chatMessages && chatMessages.length > 0) {
-          lastMessageCountRef.current = chatMessages.length;
-          firstMessageIdRef.current = chatMessages[0]?._id;
+        // Update state to prevent detection as new messages
+        if (chatMessages?.length > 0) {
+          state.lastMessageCount = chatMessages.length;
+          state.firstMessageId = chatMessages[0]?._id;
         }
       });
     }
@@ -103,9 +96,6 @@ export function useInfiniteScroll({
     messages,
     currentChatId,
     messagesContainerRef,
-    scrollHeightRef,
-    justLoadedOlderMessagesRef,
-    firstMessageIdRef,
-    lastMessageCountRef,
+    scrollStateRef,
   ]);
 }

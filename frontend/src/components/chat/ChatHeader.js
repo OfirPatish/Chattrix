@@ -3,6 +3,8 @@
 import { useState } from "react";
 import useAuthStore from "@/store/authStore";
 import { userAPI } from "@/lib/api";
+import { getAvatarUrl } from "@/utils/avatarUtils";
+import Image from "next/image";
 import { User, X } from "lucide-react";
 
 export default function ChatHeader({ chat }) {
@@ -32,16 +34,24 @@ export default function ChatHeader({ chat }) {
   return (
     <>
       <div className="px-5 py-4 border-b border-base-300 bg-base-100/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 h-11">
+          <div className="flex items-center gap-3 h-11">
           <div className="avatar placeholder">
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center shadow-md ring-2 ring-base-100">
-              <User className="h-6 w-6" />
-            </div>
-            <div
-              className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-base-100 ${
-                otherUser?.isOnline ? "bg-success" : "bg-base-300"
-              }`}
-            ></div>
+            {getAvatarUrl(otherUser?.avatar, otherUser?.username) ? (
+              <div className="w-11 h-11 rounded-full overflow-hidden shadow-md ring-2 ring-base-100">
+                <Image
+                  src={getAvatarUrl(otherUser?.avatar, otherUser?.username)}
+                  alt={otherUser?.username || "Avatar"}
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center shadow-md ring-2 ring-base-100">
+                <User className="h-6 w-6" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <button
@@ -51,16 +61,11 @@ export default function ChatHeader({ chat }) {
             >
               {otherUser?.username || "Unknown User"}
             </button>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  otherUser?.isOnline ? "bg-success" : "bg-base-300"
-                }`}
-              ></div>
-              <p className="text-xs text-base-content/70">
-                {otherUser?.isOnline ? "Active now" : "Offline"}
-              </p>
-            </div>
+            <p className={`text-xs mt-0.5 ${
+              otherUser?.isOnline ? "text-success" : "text-base-content/70"
+            }`}>
+              {otherUser?.isOnline ? "Online" : "Offline"}
+            </p>
           </div>
         </div>
       </div>
@@ -84,14 +89,24 @@ export default function ChatHeader({ chat }) {
             <div className="p-6 space-y-4">
               <div className="flex flex-col items-center">
                 <div className="avatar placeholder mb-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center shadow-lg ring-4 ring-base-100">
-                    <User className="h-12 w-12" />
-                  </div>
-                  {userDetails.isOnline && (
-                    <div className="absolute bottom-1 right-1 w-5 h-5 bg-success border-4 border-base-100 rounded-full"></div>
+                  {getAvatarUrl(userDetails.avatar, userDetails.username) ? (
+                    <div className="w-24 h-24 rounded-full overflow-hidden shadow-lg ring-4 ring-base-100">
+                      <Image
+                        src={getAvatarUrl(userDetails.avatar, userDetails.username)}
+                        alt={userDetails.username || "Avatar"}
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center shadow-lg ring-4 ring-base-100">
+                      <User className="h-12 w-12" />
+                    </div>
                   )}
                 </div>
-                <h4 className="text-2xl font-bold mb-1">
+                <h4 className="text-2xl font-bold mb-1 truncate max-w-full px-4">
                   {userDetails.username}
                 </h4>
                 <p className="text-sm text-base-content/70">

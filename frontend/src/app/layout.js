@@ -32,12 +32,13 @@ export const metadata = {
     statusBarStyle: "black-translucent",
     title: "Chattrix",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    viewportFit: "cover",
-  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
   themeColor: "#6c5ce7",
 };
 

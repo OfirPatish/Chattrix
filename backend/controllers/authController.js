@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import { generateToken } from "../utils/generateToken.js";
+import { generateRandomAvatar } from "../utils/generateAvatar.js";
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -20,11 +21,15 @@ export const register = async (req, res, next) => {
       });
     }
 
+    // Generate avatar for new user
+    const avatar = generateRandomAvatar(username);
+
     // Create user
     const user = await User.create({
       username,
       email,
       password,
+      avatar,
     });
 
     res.status(201).json({

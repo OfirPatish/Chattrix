@@ -9,42 +9,45 @@ const useChatStore = create((set, get) => ({
   isLoading: false,
   isLoadingMore: false,
   error: null,
+  hasInitiallyFetched: false, // Track if initial fetch has been attempted
+
+  // Helper to extract error message
+  _getErrorMessage: (error, defaultMsg) => {
+    return (
+      error?.response?.data?.error ||
+      error?.response?.data?.message ||
+      error?.message ||
+      defaultMsg
+    );
+  },
 
   // Chat actions
   fetchChats: async () => {
     set({ isLoading: true, error: null });
     try {
-      console.log("Fetching chats...");
       const response = await chatAPI.getChats();
-      console.log("Chats response:", response);
-
-      if (response && response.success) {
-        set({ chats: response.data || [], isLoading: false, error: null });
+      if (response?.success) {
+        set({
+          chats: response.data || [],
+          isLoading: false,
+          error: null,
+          hasInitiallyFetched: true,
+        });
       } else {
-        // If response doesn't have success, still set loading to false
-        console.warn("Unexpected response format:", response);
         set({
           chats: [],
           isLoading: false,
           error:
             response?.error || response?.message || "Failed to fetch chats",
+          hasInitiallyFetched: true,
         });
       }
     } catch (error) {
-      console.error("Error fetching chats:", error);
-      console.error("Error details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
       set({
-        error:
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch chats",
+        error: get()._getErrorMessage(error, "Failed to fetch chats"),
         isLoading: false,
-        chats: [], // Ensure chats is set even on error
+        chats: [],
+        hasInitiallyFetched: true,
       });
     }
   },
@@ -52,7 +55,7 @@ const useChatStore = create((set, get) => ({
   createChat: async (userId) => {
     try {
       const response = await chatAPI.createChat(userId);
-      if (response.success) {
+      if (response?.success) {
         const newChat = response.data;
         set((state) => ({
           chats: [newChat, ...state.chats.filter((c) => c._id !== newChat._id)],
@@ -60,10 +63,14 @@ const useChatStore = create((set, get) => ({
         }));
         return { success: true, chat: newChat };
       }
+      return {
+        success: false,
+        error: response?.error || response?.message || "Failed to create chat",
+      };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || "Failed to create chat",
+        error: get()._getErrorMessage(error, "Failed to create chat"),
       };
     }
   },
@@ -75,7 +82,7 @@ const useChatStore = create((set, get) => ({
   fetchChatById: async (chatId) => {
     try {
       const response = await chatAPI.getChatById(chatId);
-      if (response.success) {
+      if (response?.success) {
         const chat = response.data;
         set((state) => ({
           chats: state.chats.map((c) => (c._id === chatId ? chat : c)),
@@ -84,10 +91,14 @@ const useChatStore = create((set, get) => ({
         }));
         return { success: true, chat };
       }
+      return {
+        success: false,
+        error: response?.error || response?.message || "Failed to fetch chat",
+      };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || "Failed to fetch chat",
+        error: get()._getErrorMessage(error, "Failed to fetch chat"),
       };
     }
   },
@@ -154,13 +165,24 @@ const useChatStore = create((set, get) => ({
           isLoading: false,
         }));
       } else {
-        set({ isLoading: false });
+        // Mark as fetched even on error so we don't show loading indefinitely
+        set((state) => ({
+          isLoading: false,
+          pagination: {
+            ...state.pagination,
+            [chatId]: { page: 1, hasMore: false, totalPages: 1 },
+          },
+        }));
       }
     } catch (error) {
-      set({
-        error: error.response?.data?.error || "Failed to fetch messages",
+      set((state) => ({
+        error: get()._getErrorMessage(error, "Failed to fetch messages"),
         isLoading: false,
-      });
+        pagination: {
+          ...state.pagination,
+          [chatId]: { page: 1, hasMore: false, totalPages: 1 },
+        },
+      }));
     }
   },
 
@@ -211,7 +233,7 @@ const useChatStore = create((set, get) => ({
       }
     } catch (error) {
       set({
-        error: error.response?.data?.error || "Failed to load more messages",
+        error: get()._getErrorMessage(error, "Failed to load more messages"),
         isLoadingMore: false,
       });
     }
@@ -264,6 +286,7 @@ const useChatStore = create((set, get) => ({
       error: null,
       isLoading: false,
       isLoadingMore: false,
+      hasInitiallyFetched: false,
     });
   },
 }));

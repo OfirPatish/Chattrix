@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Image from "next/image";
-import { CheckCheck, Check, User } from "lucide-react";
+import { CheckCheck, Check } from "lucide-react";
 import useAuthStore from "@/store/authStore";
 
 function MessageBubble({ message, showAvatar, isGrouped }) {
@@ -29,19 +29,8 @@ function MessageBubble({ message, showAvatar, isGrouped }) {
         isGrouped ? "mb-0.5" : "mb-2"
       }`}
     >
-      {!isOwn && (
-        <div className="chat-image avatar">
-          {showAvatar ? (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-base-content flex items-center justify-center shadow-sm">
-              <User className="h-4 w-4" />
-            </div>
-          ) : (
-            <div className="w-8"></div>
-          )}
-        </div>
-      )}
       {!isOwn && showAvatar && (
-        <div className="chat-header text-xs text-base-content/60 mb-1 px-2 font-medium">
+        <div className="chat-header text-xs text-base-content/60 mb-1 px-2 font-medium truncate">
           {message.sender?.username}
         </div>
       )}
@@ -65,25 +54,28 @@ function MessageBubble({ message, showAvatar, isGrouped }) {
         <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">
           {message.content}
         </p>
-      </div>
-      {isOwn && (
-        <div className="chat-image avatar">
-          <div className="w-8"></div>
-        </div>
-      )}
-      <div className="chat-footer text-[11px] flex items-center gap-1 opacity-70">
-        <span className="text-base-content/60">
-          {formatTime(message.createdAt)}
-        </span>
-        {isOwn && (
-          <span className="flex-shrink-0">
-            {isRead ? (
-              <CheckCheck className="w-3.5 h-3.5 text-info" />
-            ) : (
-              <Check className="w-3.5 h-3.5 text-base-content/50" />
-            )}
+        <div
+          className={`flex items-center gap-1 mt-1 ${
+            isOwn ? "justify-end" : "justify-start"
+          }`}
+        >
+          <span
+            className={`text-[11px] opacity-70 ${
+              isOwn ? "text-primary-content/70" : "text-base-content/60"
+            }`}
+          >
+            {formatTime(message.createdAt)}
           </span>
-        )}
+          {isOwn && (
+            <span className="flex-shrink-0">
+              {isRead ? (
+                <CheckCheck className="w-3.5 h-3.5 text-primary-content/70" />
+              ) : (
+                <Check className="w-3.5 h-3.5 text-primary-content/50" />
+              )}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

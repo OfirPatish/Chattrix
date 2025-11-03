@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import useChatStore from "@/store/chatStore";
 import useAuthStore from "@/store/authStore";
 import ChatListItem from "./ChatListItem";
@@ -18,24 +18,17 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
     isLoading,
     messages,
     error,
+    hasInitiallyFetched,
   } = useChatStore();
   const { user } = useAuthStore();
   const { isConnected } = useSocket();
-  const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Only fetch once if chats haven't been loaded yet and we're not currently loading
-    if (!hasFetched.current && chats.length === 0 && !isLoading) {
-      hasFetched.current = true;
-      // Use getState() to avoid dependency issues - Zustand functions are stable
-      useChatStore.getState().fetchChats();
+    // Only fetch once if initial fetch hasn't been attempted yet
+    if (!hasInitiallyFetched && !isLoading) {
+      fetchChats();
     }
-    // Reset the ref if chats are cleared (e.g., on logout)
-    if (chats.length > 0) {
-      hasFetched.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chats.length, isLoading]); // fetchChats is stable from Zustand, no need to include
+  }, [hasInitiallyFetched, isLoading, fetchChats]);
 
   const handleChatClick = (chat) => {
     setCurrentChat(chat);
@@ -80,7 +73,7 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {isLoading && chats.length === 0 ? (
+        {isLoading || !hasInitiallyFetched ? (
           <ChatListSkeleton count={3} />
         ) : error ? (
           <EmptyState

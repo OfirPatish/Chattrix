@@ -27,8 +27,8 @@ export default function PasswordInput({
           type={showPassword ? "text" : "password"}
           className={`input input-bordered input-lg w-full text-sm sm:text-base pl-12 ${
             showPasswordToggle ? "pr-12" : "pr-4"
-          } relative z-0 ${
-            props.error ? "input-error" : "focus:input-primary"
+          } relative z-0 focus:outline-none ${
+            props.error ? "input-error" : ""
           } ${props.className || ""}`}
         />
         {showPasswordToggle && (

@@ -34,8 +34,10 @@ const FormInput = forwardRef(
             ref={ref}
             className={`input input-bordered input-lg w-full text-sm sm:text-base ${
               Icon ? "pl-12" : "pl-4"
-            } ${rightElement ? "pr-12" : "pr-4"} relative z-0 ${
-              error ? "input-error" : "focus:input-primary"
+            } ${
+              rightElement ? "pr-12" : "pr-4"
+            } relative z-0 focus:outline-none ${
+              error ? "input-error" : ""
             } ${className}`}
             {...props}
           />
@@ -53,4 +55,3 @@ const FormInput = forwardRef(
 FormInput.displayName = "FormInput";
 
 export default FormInput;
-
