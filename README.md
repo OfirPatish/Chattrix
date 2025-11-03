@@ -4,7 +4,7 @@ A modern, real-time chat application showcasing full-stack development with real
 
 ## 🌐 Live Demo
 
-Check out the live application: **[https://chattrix-frontend-rgv4.onrender.com/](https://chattrix-frontend-rgv4.onrender.com/)**
+Check out the live application: **[https://chattrix-frontend-ygl8.onrender.com/](https://chattrix-frontend-ygl8.onrender.com/)**
 
 ## 🚀 Tech Stack
 
