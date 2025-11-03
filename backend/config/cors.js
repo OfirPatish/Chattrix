@@ -13,7 +13,13 @@ if (!frontendUrl && process.env.NODE_ENV === "production") {
 export const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log("✅ CORS: Request with no origin (allowed)");
+      return callback(null, true);
+    }
+
+    // Log all CORS requests for debugging
+    console.log(`🔍 CORS Check: Origin="${origin}", Expected="${frontendUrl}"`);
 
     // If FRONTEND_URL is set, only allow that origin (normalize URLs)
     if (frontendUrl) {
@@ -21,15 +27,23 @@ export const corsOptions = {
       const normalizedFrontendUrl = frontendUrl.replace(/\/$/, ""); // Remove trailing slash
 
       if (normalizedOrigin === normalizedFrontendUrl) {
+        console.log("✅ CORS: Origin matched, allowing request");
         callback(null, true);
       } else {
         console.error(
           `❌ CORS Error: Origin "${origin}" not allowed. Expected: "${frontendUrl}"`
         );
-        callback(new Error(`CORS: Origin not allowed`));
+        console.error(`   Normalized Origin: "${normalizedOrigin}"`);
+        console.error(`   Normalized Expected: "${normalizedFrontendUrl}"`);
+        callback(
+          new Error(
+            `CORS: Origin "${origin}" not allowed. Expected: "${frontendUrl}"`
+          )
+        );
       }
     } else {
       // Development: allow all origins
+      console.log("⚠️  CORS: FRONTEND_URL not set, allowing all origins");
       callback(null, true);
     }
   },
