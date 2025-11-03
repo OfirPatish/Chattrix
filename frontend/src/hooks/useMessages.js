@@ -8,7 +8,7 @@ export function useMessages(chatId, page = 1, limit = 50) {
     queryFn: async () => {
       if (!chatId) return null;
       const response = await messageAPI.getMessages(chatId, page, limit);
-      if (response.success) {
+      if (response && response.success) {
         return {
           messages: response.data,
           page: response.page || page,
@@ -16,7 +16,7 @@ export function useMessages(chatId, page = 1, limit = 50) {
           hasMore: (response.page || page) < (response.pages || 1),
         };
       }
-      throw new Error(response.error || "Failed to fetch messages");
+      throw new Error(response?.error || response?.message || "Failed to fetch messages");
     },
     enabled: !!chatId,
     staleTime: 1 * 60 * 1000, // 1 minute
@@ -30,7 +30,7 @@ export function useInfiniteMessages(chatId, limit = 50) {
     queryFn: async ({ pageParam = 1 }) => {
       if (!chatId) return null;
       const response = await messageAPI.getMessages(chatId, pageParam, limit);
-      if (response.success) {
+      if (response && response.success) {
         return {
           messages: response.data,
           page: response.page || pageParam,
@@ -38,7 +38,7 @@ export function useInfiniteMessages(chatId, limit = 50) {
           hasMore: (response.page || pageParam) < (response.pages || 1),
         };
       }
-      throw new Error(response.error || "Failed to fetch messages");
+      throw new Error(response?.error || response?.message || "Failed to fetch messages");
     },
     enabled: !!chatId,
     initialPageParam: 1,

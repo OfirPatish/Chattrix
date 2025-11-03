@@ -8,10 +8,10 @@ export function useChats() {
     queryKey: ["chats"],
     queryFn: async () => {
       const response = await chatAPI.getChats();
-      if (response.success) {
+      if (response && response.success) {
         return response.data;
       }
-      throw new Error(response.error || "Failed to fetch chats");
+      throw new Error(response?.error || response?.message || "Failed to fetch chats");
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
@@ -25,10 +25,10 @@ export function useCreateChat() {
   return useMutation({
     mutationFn: async (userId) => {
       const response = await chatAPI.createChat(userId);
-      if (response.success) {
+      if (response && response.success) {
         return response.data;
       }
-      throw new Error(response.error || "Failed to create chat");
+      throw new Error(response?.error || response?.message || "Failed to create chat");
     },
     onSuccess: (newChat) => {
       // Update Zustand store
@@ -48,10 +48,10 @@ export function useChatById(chatId) {
     queryFn: async () => {
       if (!chatId) return null;
       const response = await chatAPI.getChatById(chatId);
-      if (response.success) {
+      if (response && response.success) {
         return response.data;
       }
-      throw new Error(response.error || "Failed to fetch chat");
+      throw new Error(response?.error || response?.message || "Failed to fetch chat");
     },
     enabled: !!chatId,
     staleTime: 2 * 60 * 1000, // 2 minutes

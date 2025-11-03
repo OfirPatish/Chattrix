@@ -29,10 +29,10 @@ export function useLogin() {
   return useMutation({
     mutationFn: async ({ email, password }) => {
       const response = await authAPI.login({ email, password });
-      if (response.success) {
+      if (response && response.success) {
         return response.data;
       }
-      throw new Error(response.error || "Login failed");
+      throw new Error(response?.error || response?.message || "Login failed");
     },
     onSuccess: (data) => {
       // Update Zustand store (which will persist to localStorage via persist middleware)
@@ -52,10 +52,10 @@ export function useRegister() {
   return useMutation({
     mutationFn: async ({ username, email, password }) => {
       const response = await authAPI.register({ username, email, password });
-      if (response.success) {
+      if (response && response.success) {
         return response.data;
       }
-      throw new Error(response.error || "Registration failed");
+      throw new Error(response?.error || response?.message || "Registration failed");
     },
     onSuccess: (data) => {
       // Update Zustand store (which will persist to localStorage via persist middleware)
@@ -81,10 +81,10 @@ export function useGetMe() {
         throw new Error("No token available");
       }
       const response = await authAPI.getMe();
-      if (response.success) {
+      if (response && response.success) {
         return response.data;
       }
-      throw new Error(response.error || "Failed to get user");
+      throw new Error(response?.error || response?.message || "Failed to get user");
     },
     enabled: !!token,
     retry: false,
