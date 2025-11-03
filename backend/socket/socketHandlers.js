@@ -30,13 +30,26 @@ export const setupSocketHandlers = (io) => {
 
   // Socket.io connection handling
   io.on("connection", async (socket) => {
-    console.log(`✅ User connected: ${socket.user.username} (${socket.userId})`);
+    // Safety check: ensure user is authenticated
+    if (!socket.user || !socket.userId) {
+      console.error("Socket connection without authenticated user");
+      socket.disconnect();
+      return;
+    }
+
+    console.log(
+      `✅ User connected: ${socket.user.username} (${socket.userId})`
+    );
 
     // Update user online status
-    await User.findByIdAndUpdate(socket.userId, {
-      isOnline: true,
-      lastSeen: new Date(),
-    });
+    try {
+      await User.findByIdAndUpdate(socket.userId, {
+        isOnline: true,
+        lastSeen: new Date(),
+      });
+    } catch (error) {
+      console.error("Error updating user online status:", error);
+    }
 
     // Join user's personal room
     socket.join(socket.userId);
@@ -79,6 +92,12 @@ export const setupSocketHandlers = (io) => {
     // Handle new message
     socket.on("send-message", async (data) => {
       try {
+        // Validate input data
+        if (!data || !data.chatId || !data.content) {
+          socket.emit("error", { message: "Chat ID and content are required" });
+          return;
+        }
+
         const { chatId, content, messageType, imageUrl } = data;
 
         // Verify user is part of the chat
@@ -123,6 +142,9 @@ export const setupSocketHandlers = (io) => {
 
     // Handle typing indicator
     socket.on("typing-start", (data) => {
+      if (!data || !data.chatId) {
+        return;
+      }
       const { chatId } = data;
       socket.to(chatId).emit("typing-start", {
         userId: socket.userId,
@@ -131,6 +153,9 @@ export const setupSocketHandlers = (io) => {
     });
 
     socket.on("typing-stop", (data) => {
+      if (!data || !data.chatId) {
+        return;
+      }
       const { chatId } = data;
       socket.to(chatId).emit("typing-stopped", {
         userId: socket.userId,
@@ -141,6 +166,12 @@ export const setupSocketHandlers = (io) => {
     // Handle message read
     socket.on("mark-read", async (data) => {
       try {
+        // Validate input
+        if (!data || !data.messageId) {
+          socket.emit("error", { message: "Message ID is required" });
+          return;
+        }
+
         const { messageId } = data;
         const message = await Message.findById(messageId);
 
@@ -173,20 +204,29 @@ export const setupSocketHandlers = (io) => {
 
     // Handle disconnect
     socket.on("disconnect", async () => {
+      // Safety check: user might be undefined if connection failed
+      if (!socket.user || !socket.userId) {
+        console.log("❌ User disconnected (unauthenticated)");
+        return;
+      }
+
       console.log(`❌ User disconnected: ${socket.user.username}`);
 
       // Update user offline status
-      await User.findByIdAndUpdate(socket.userId, {
-        isOnline: false,
-        lastSeen: new Date(),
-      });
+      try {
+        await User.findByIdAndUpdate(socket.userId, {
+          isOnline: false,
+          lastSeen: new Date(),
+        });
 
-      // Emit offline status to all contacts
-      socket.broadcast.emit("user-offline", {
-        userId: socket.userId,
-        isOnline: false,
-      });
+        // Emit offline status to all contacts
+        socket.broadcast.emit("user-offline", {
+          userId: socket.userId,
+          isOnline: false,
+        });
+      } catch (error) {
+        console.error("Error updating user offline status:", error);
+      }
     });
   });
 };
-

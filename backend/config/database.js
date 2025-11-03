@@ -22,15 +22,13 @@ const connectDB = async () => {
       console.warn("⚠️  MongoDB disconnected");
     });
 
-    // Graceful shutdown
-    process.on("SIGINT", async () => {
-      await mongoose.connection.close();
-      console.log("MongoDB connection closed through app termination");
-      process.exit(0);
-    });
+    // Note: Graceful shutdown is handled in server.js to coordinate
+    // HTTP server and database shutdown together
+
+    return conn;
   } catch (error) {
     console.error(`❌ MongoDB connection error: ${error.message}`);
-    process.exit(1);
+    throw error; // Throw instead of exit so we can handle it in startServer
   }
 };
 
