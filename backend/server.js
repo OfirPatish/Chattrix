@@ -25,6 +25,9 @@ connectDB();
 const app = express();
 const httpServer = createServer(app);
 
+// Trust proxy (required for Render and other hosting platforms)
+app.set("trust proxy", 1);
+
 // Socket.io setup with CORS
 const io = new Server(httpServer, {
   cors: {
@@ -34,8 +37,16 @@ const io = new Server(httpServer, {
   },
 });
 
+// CORS configuration - must match Socket.io settings
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
