@@ -16,7 +16,9 @@ export function useMessages(chatId, page = 1, limit = 50) {
           hasMore: (response.page || page) < (response.pages || 1),
         };
       }
-      throw new Error(response?.error || response?.message || "Failed to fetch messages");
+      throw new Error(
+        response?.error || response?.message || "Failed to fetch messages"
+      );
     },
     enabled: !!chatId,
     staleTime: 1 * 60 * 1000, // 1 minute
@@ -38,7 +40,9 @@ export function useInfiniteMessages(chatId, limit = 50) {
           hasMore: (response.page || pageParam) < (response.pages || 1),
         };
       }
-      throw new Error(response?.error || response?.message || "Failed to fetch messages");
+      throw new Error(
+        response?.error || response?.message || "Failed to fetch messages"
+      );
     },
     enabled: !!chatId,
     initialPageParam: 1,

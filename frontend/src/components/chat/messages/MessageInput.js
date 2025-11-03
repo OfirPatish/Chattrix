@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import useChatStore from "@/store/chatStore";
 import { useSocket } from "@/hooks/useSocket";
@@ -11,6 +11,7 @@ export default function MessageInput() {
   const { sendMessage, startTyping, stopTyping } = useSocket();
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef(null);
 
   // Debounced callback to stop typing after 1 second of inactivity
@@ -42,25 +43,54 @@ export default function MessageInput() {
     debouncedStopTyping();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!message.trim() || !currentChat?._id) return;
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event bubbling
 
-    sendMessage(currentChat._id, message.trim());
-    setMessage("");
+      // Prevent duplicate submissions
+      if (isSending || !message.trim() || !currentChat?._id) {
+        return;
+      }
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+      setIsSending(true);
+      const messageToSend = message.trim();
 
-    if (isTyping && currentChat?._id) {
-      stopTyping(currentChat._id);
-      setIsTyping(false);
-    }
+      // Clear input immediately
+      setMessage("");
 
-    // Cancel debounced stop typing since we're submitting
-    debouncedStopTyping.cancel();
-  };
+      // Send message
+      sendMessage(currentChat._id, messageToSend);
+
+      // Reset textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+
+      // Stop typing indicator
+      if (isTyping && currentChat?._id) {
+        stopTyping(currentChat._id);
+        setIsTyping(false);
+      }
+
+      // Cancel debounced stop typing since we're submitting
+      debouncedStopTyping.cancel();
+
+      // Allow sending again after a short delay (prevents rapid duplicate sends)
+      setTimeout(() => {
+        setIsSending(false);
+      }, 500);
+    },
+    [
+      message,
+      currentChat,
+      isSending,
+      isTyping,
+      sendMessage,
+      stopTyping,
+      debouncedStopTyping,
+    ]
+  );
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -89,9 +119,9 @@ export default function MessageInput() {
             />
             <button
               type="submit"
-              disabled={!message.trim()}
+              disabled={!message.trim() || isSending}
               className={`btn btn-circle btn-sm transition-all ${
-                message.trim()
+                message.trim() && !isSending
                   ? "btn-primary hover:scale-110 active:scale-95"
                   : "btn-disabled"
               }`}

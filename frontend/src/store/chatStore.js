@@ -220,6 +220,14 @@ const useChatStore = create((set, get) => ({
   addMessage: (chatId, message) => {
     set((state) => {
       const chatMessages = state.messages[chatId] || [];
+
+      // Prevent duplicate messages (check by message ID)
+      const messageExists = chatMessages.some((m) => m._id === message._id);
+      if (messageExists) {
+        console.warn("Duplicate message prevented:", message._id);
+        return state; // Return unchanged state
+      }
+
       return {
         messages: {
           ...state.messages,

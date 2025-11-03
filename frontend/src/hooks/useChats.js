@@ -11,7 +11,9 @@ export function useChats() {
       if (response && response.success) {
         return response.data;
       }
-      throw new Error(response?.error || response?.message || "Failed to fetch chats");
+      throw new Error(
+        response?.error || response?.message || "Failed to fetch chats"
+      );
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
@@ -28,7 +30,9 @@ export function useCreateChat() {
       if (response && response.success) {
         return response.data;
       }
-      throw new Error(response?.error || response?.message || "Failed to create chat");
+      throw new Error(
+        response?.error || response?.message || "Failed to create chat"
+      );
     },
     onSuccess: (newChat) => {
       // Update Zustand store
@@ -51,7 +55,9 @@ export function useChatById(chatId) {
       if (response && response.success) {
         return response.data;
       }
-      throw new Error(response?.error || response?.message || "Failed to fetch chat");
+      throw new Error(
+        response?.error || response?.message || "Failed to fetch chat"
+      );
     },
     enabled: !!chatId,
     staleTime: 2 * 60 * 1000, // 2 minutes

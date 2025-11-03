@@ -55,7 +55,9 @@ export function useRegister() {
       if (response && response.success) {
         return response.data;
       }
-      throw new Error(response?.error || response?.message || "Registration failed");
+      throw new Error(
+        response?.error || response?.message || "Registration failed"
+      );
     },
     onSuccess: (data) => {
       // Update Zustand store (which will persist to localStorage via persist middleware)
@@ -84,7 +86,9 @@ export function useGetMe() {
       if (response && response.success) {
         return response.data;
       }
-      throw new Error(response?.error || response?.message || "Failed to get user");
+      throw new Error(
+        response?.error || response?.message || "Failed to get user"
+      );
     },
     enabled: !!token,
     retry: false,

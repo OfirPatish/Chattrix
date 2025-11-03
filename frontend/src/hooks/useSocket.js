@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import useAuthStore from "@/store/authStore";
 import useChatStore from "@/store/chatStore";
@@ -15,6 +15,10 @@ let connectionState = { isConnected: false, listeners: new Set() };
 let connectionListenersSetup = false;
 let messageListenersSetup = false;
 let currentToken = null;
+
+// Track last sent message to prevent duplicates
+let lastSentMessage = { chatId: null, content: null, timestamp: 0 };
+const DUPLICATE_MESSAGE_WINDOW = 1000; // 1 second window
 
 // Cleanup and disconnect socket
 export const disconnectSocket = () => {
@@ -162,22 +166,38 @@ export const useSocket = () => {
     };
   }, [token, user]);
 
-  // Send message via socket
-  const sendMessage = (
-    chatId,
-    content,
-    messageType = "text",
-    imageUrl = ""
-  ) => {
-    if (socketInstance?.connected) {
+  // Send message via socket (memoized to prevent recreation)
+  const sendMessage = useCallback(
+    (chatId, content, messageType = "text", imageUrl = "") => {
+      if (!socketInstance?.connected) {
+        console.warn("Socket not connected, cannot send message");
+        return;
+      }
+
+      // Prevent duplicate sends within 1 second
+      const now = Date.now();
+      if (
+        lastSentMessage.chatId === chatId &&
+        lastSentMessage.content === content &&
+        now - lastSentMessage.timestamp < DUPLICATE_MESSAGE_WINDOW
+      ) {
+        console.warn("Duplicate message prevented:", { chatId, content });
+        return;
+      }
+
+      // Update last sent message
+      lastSentMessage = { chatId, content, timestamp: now };
+
+      // Emit message
       socketInstance.emit("send-message", {
         chatId,
         content,
         messageType,
         imageUrl,
       });
-    }
-  };
+    },
+    []
+  );
 
   // Typing indicators
   const startTyping = (chatId) => {
