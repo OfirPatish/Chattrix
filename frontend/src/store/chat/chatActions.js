@@ -193,4 +193,84 @@ export const createChatActions = (set, get) => ({
       };
     });
   },
+
+  // Update user online status in all chats and current chat
+  updateUserStatus: (userId, status) => {
+    set((state) => {
+      const { isOnline, lastSeen } = status;
+      let hasChanges = false;
+
+      // Helper function to update participant status in a participants array
+      const updateParticipantStatus = (participants) => {
+        if (!participants || !Array.isArray(participants)) {
+          return null;
+        }
+
+        const participantIndex = participants.findIndex(
+          (p) => p._id === userId || p?.toString() === userId
+        );
+
+        if (participantIndex === -1) {
+          return null;
+        }
+
+        const participant = participants[participantIndex];
+        const currentStatus = participant.isOnline;
+        const currentLastSeen = participant.lastSeen;
+
+        // Check if status actually changed
+        if (
+          currentStatus !== isOnline ||
+          (lastSeen && currentLastSeen !== lastSeen)
+        ) {
+          hasChanges = true;
+          const updatedParticipants = [...participants];
+          updatedParticipants[participantIndex] = {
+            ...participant,
+            isOnline,
+            ...(lastSeen && { lastSeen }),
+          };
+          return updatedParticipants;
+        }
+
+        return null; // No changes
+      };
+
+      // Update participants in chats array
+      const updatedChats = state.chats.map((chat) => {
+        const updatedParticipants = updateParticipantStatus(chat.participants);
+        if (updatedParticipants) {
+          return {
+            ...chat,
+            participants: updatedParticipants,
+          };
+        }
+        return chat;
+      });
+
+      // Update current chat if it contains this user
+      let updatedCurrentChat = state.currentChat;
+      if (updatedCurrentChat?.participants) {
+        const updatedParticipants = updateParticipantStatus(
+          updatedCurrentChat.participants
+        );
+        if (updatedParticipants) {
+          updatedCurrentChat = {
+            ...updatedCurrentChat,
+            participants: updatedParticipants,
+          };
+        }
+      }
+
+      // Only update state if there were actual changes
+      if (!hasChanges) {
+        return state;
+      }
+
+      return {
+        chats: updatedChats,
+        currentChat: updatedCurrentChat,
+      };
+    });
+  },
 });

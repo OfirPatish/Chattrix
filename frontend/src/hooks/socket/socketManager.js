@@ -17,6 +17,69 @@ let currentToken = null;
 let lastSentMessage = { chatId: null, content: null, timestamp: 0 };
 const DUPLICATE_MESSAGE_WINDOW = 1000; // 1 second window
 
+// Setup message event listeners (only once)
+// Declared early to avoid reference errors
+export const setupMessageListeners = (socket) => {
+  if (messageListenersSetup || !socket) return;
+
+  // Mark as setup immediately to prevent duplicate calls
+  messageListenersSetup = true;
+
+  // Use dynamic import to avoid circular dependency
+  import("@/store/chatStore").then(({ default: useChatStore }) => {
+    // Set up listeners immediately when module loads
+    socket.on("receive-message", (message) => {
+      const { addMessage, updateChat } = useChatStore.getState();
+      // Handle both ObjectId string and populated chat object
+      const chatId =
+        typeof message.chat === "string"
+          ? message.chat
+          : message.chat?._id || message.chat;
+      if (chatId) {
+        addMessage(chatId, message);
+        updateChat(chatId, { lastMessage: message });
+      }
+    });
+
+    socket.on("message-read", ({ messageId, userId }) => {
+      const { currentChat, messages, updateMessage } = useChatStore.getState();
+      if (currentChat?._id) {
+        const chatMessages = messages[currentChat._id] || [];
+        const message = chatMessages.find((m) => m._id === messageId);
+        if (message) {
+          updateMessage(currentChat._id, messageId, {
+            readBy: [
+              ...(message.readBy || []),
+              { user: userId, readAt: new Date() },
+            ],
+          });
+        }
+      }
+    });
+
+    // Listen for user online status updates
+    socket.on("user-online", ({ userId, isOnline }) => {
+      const { updateUserStatus } = useChatStore.getState();
+      if (userId) {
+        updateUserStatus(userId, {
+          isOnline: isOnline !== undefined ? isOnline : true,
+          lastSeen: new Date(),
+        });
+      }
+    });
+
+    socket.on("user-offline", ({ userId, isOnline }) => {
+      const { updateUserStatus } = useChatStore.getState();
+      if (userId) {
+        updateUserStatus(userId, {
+          isOnline: isOnline !== undefined ? isOnline : false,
+          lastSeen: new Date(),
+        });
+      }
+    });
+  });
+};
+
 // Cleanup and disconnect socket
 export const disconnectSocket = () => {
   if (socketInstance) {
@@ -74,6 +137,11 @@ const getSocket = (token) => {
       console.log("✅ Socket connected");
       connectionState.isConnected = true;
       connectionState.listeners.forEach((setConnected) => setConnected(true));
+
+      // Set up message listeners when socket connects (if not already set up)
+      if (!messageListenersSetup) {
+        setupMessageListeners(socketInstance);
+      }
     });
 
     socketInstance.on("disconnect", (reason) => {
@@ -93,48 +161,14 @@ const getSocket = (token) => {
     });
 
     connectionListenersSetup = true;
+
+    // If socket is already connected, set up listeners immediately
+    if (socketInstance.connected && !messageListenersSetup) {
+      setupMessageListeners(socketInstance);
+    }
   }
 
   return socketInstance;
-};
-
-// Setup message event listeners (only once)
-export const setupMessageListeners = (socket) => {
-  if (messageListenersSetup || !socket) return;
-
-  // Use dynamic import to avoid circular dependency
-  import("@/store/chatStore").then(({ default: useChatStore }) => {
-    socket.on("receive-message", (message) => {
-      const { addMessage, updateChat } = useChatStore.getState();
-      // Handle both ObjectId string and populated chat object
-      const chatId =
-        typeof message.chat === "string"
-          ? message.chat
-          : message.chat?._id || message.chat;
-      if (chatId) {
-        addMessage(chatId, message);
-        updateChat(chatId, { lastMessage: message });
-      }
-    });
-
-    socket.on("message-read", ({ messageId, userId }) => {
-      const { currentChat, messages, updateMessage } = useChatStore.getState();
-      if (currentChat?._id) {
-        const chatMessages = messages[currentChat._id] || [];
-        const message = chatMessages.find((m) => m._id === messageId);
-        if (message) {
-          updateMessage(currentChat._id, messageId, {
-            readBy: [
-              ...(message.readBy || []),
-              { user: userId, readAt: new Date() },
-            ],
-          });
-        }
-      }
-    });
-  });
-
-  messageListenersSetup = true;
 };
 
 // Get or create socket instance
