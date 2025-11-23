@@ -2,30 +2,36 @@
 
 RESTful API server with real-time WebSocket support built with Node.js, Express, and MongoDB.
 
-## 🛠️ Tech Stack
+## 🚀 Tech Stack
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB with Mongoose
-- **Real-time:** Socket.io
-- **Auth:** JWT, bcrypt
-- **Validation:** express-validator
+**Runtime:** Node.js  
+**Framework:** Express.js  
+**Database:** MongoDB with Mongoose  
+**Real-time:** Socket.io  
+**Authentication:** JWT, bcrypt  
+**Validation:** express-validator
 
-## ✨ Features
+## ✨ Key Features
 
-- JWT authentication
+- JWT authentication with secure password hashing
 - Real-time messaging via Socket.io
-- User management & search
-- Chat & message CRUD
-- Rate limiting
-- Error handling middleware
+- User management & search functionality
+- Chat & message CRUD operations
+- Rate limiting for API protection
+- Comprehensive error handling middleware
 - MongoDB connection pooling
 
-## 🚀 Quick Start
+## 🏃 Quick Start
 
+### Prerequisites
+- Node.js 18+
+- MongoDB database (local or Atlas)
+
+### Setup
 ```bash
 npm install
 cp .env.example .env
+# Configure .env with MONGO_URL, JWT_SECRET, PORT=3000, FRONTEND_URL
 npm run dev
 ```
 
@@ -47,12 +53,23 @@ npm run dev
 **Client → Server:** `join-chat`, `send-message`, `typing-start`, `typing-stop`, `mark-read`  
 **Server → Client:** `receive-message`, `typing-start`, `typing-stopped`, `message-read`, `user-online`, `user-offline`
 
-## 🏗️ Architecture
+## 📁 Project Structure
 
-- **MVC Pattern** - Separation of concerns
-- **Middleware** - Auth, validation, error handling, rate limiting
-- **Clean Code** - Consistent response format, error handling
+```
+backend/
+├── config/          # Configuration files (CORS, database, socket)
+├── controllers/     # Route controllers
+├── middleware/      # Auth, validation, error handling, rate limiting
+├── models/          # Mongoose models
+├── routes/          # API routes
+├── socket/          # Socket.io handlers
+└── utils/           # Utility functions
+```
 
-## 📄 License
+## 🔒 Security & Validation
 
-MIT
+- JWT-based authentication with password hashing
+- Input validation and sanitization
+- Rate limiting and CORS protection
+- MongoDB injection prevention (Mongoose)
+- Error handling middleware
