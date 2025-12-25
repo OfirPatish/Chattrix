@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from "../utils/logger.js";
 
 const connectDB = async () => {
   try {
@@ -11,15 +12,15 @@ const connectDB = async () => {
       w: "majority",
     });
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    logger.info(`📦 MongoDB connected`);
 
     // Handle connection events
     mongoose.connection.on("error", (err) => {
-      console.error(`❌ MongoDB connection error: ${err}`);
+      logger.error({ err }, "MongoDB connection error");
     });
 
     mongoose.connection.on("disconnected", () => {
-      console.warn("⚠️  MongoDB disconnected");
+      logger.warn("MongoDB disconnected");
     });
 
     // Note: Graceful shutdown is handled in server.js to coordinate
@@ -27,7 +28,7 @@ const connectDB = async () => {
 
     return conn;
   } catch (error) {
-    console.error(`❌ MongoDB connection error: ${error.message}`);
+    logger.error({ err: error }, "MongoDB connection failed");
     throw error; // Throw instead of exit so we can handle it in startServer
   }
 };

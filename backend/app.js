@@ -1,4 +1,7 @@
 import express from "express";
+import compression from "compression";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
 import corsMiddleware from "./config/cors.js";
 import { rateLimiter } from "./middleware/rateLimiter.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
@@ -10,12 +13,21 @@ const app = express();
 // Trust proxy (required for Render and other hosting platforms)
 app.set("trust proxy", 1);
 
+// Compression middleware - compress responses for better performance
+app.use(compression());
+
+// Security middleware - helmet for HTTP headers protection
+app.use(helmet());
+
 // CORS middleware - must be first to handle preflight requests
 app.use(corsMiddleware);
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parsing middleware with size limits
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Data sanitization - prevent NoSQL injection attacks
+app.use(mongoSanitize());
 
 // Rate limiting (production only)
 if (process.env.NODE_ENV === "production") {

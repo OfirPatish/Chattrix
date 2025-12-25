@@ -1,13 +1,21 @@
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export", // Enable static export for Render Static Site
   images: {
     unoptimized: true, // Required for static export
   },
-  // Note: The lockfile warning is harmless in monorepo setups.
-  // Next.js detects both root and frontend package-lock.json files,
-  // but this doesn't affect functionality. Both lockfiles are needed
-  // for the monorepo structure (root for scripts, frontend for dependencies).
+  // Set turbopack root to suppress lockfile warning in monorepo
+  experimental: {
+    turbopack: {
+      root: __dirname,
+    },
+  },
 };
 
 export default nextConfig;

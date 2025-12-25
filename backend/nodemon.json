@@ -1,0 +1,11 @@
+{
+  "verbose": false,
+  "restartable": "rs",
+  "ignore": ["node_modules", "coverage", "*.test.js"],
+  "watch": ["*.js", "**/*.js"],
+  "ext": "js,mjs,cjs,json",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
+

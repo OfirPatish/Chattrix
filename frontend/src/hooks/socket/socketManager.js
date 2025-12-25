@@ -11,7 +11,7 @@ let socketInstance = null;
 let connectionState = { isConnected: false, listeners: new Set() };
 let connectionListenersSetup = false;
 let messageListenersSetup = false;
-let currentToken = null;
+let currentAccessToken = null;
 
 // Track last sent message to prevent duplicates
 let lastSentMessage = { chatId: null, content: null, timestamp: 0 };
@@ -77,6 +77,28 @@ export const setupMessageListeners = (socket) => {
         });
       }
     });
+
+    // Listen for typing indicators from other users
+    // Note: Typing indicator UI implementation is optional
+    socket.on("typing-start", ({ userId, username }) => {
+      // Typing indicators can be implemented in UI components if needed
+      // For now, we just log it
+      if (userId && username) {
+        console.log(`User ${username} is typing...`);
+      }
+    });
+
+    socket.on("typing-stopped", ({ userId, username }) => {
+      // Typing indicators can be implemented in UI components if needed
+      if (userId) {
+        console.log(`User ${username} stopped typing`);
+      }
+    });
+
+    // Listen for socket errors (already handled in connection setup, but also listen here)
+    socket.on("error", ({ message }) => {
+      console.error("Socket error event:", message);
+    });
   });
 };
 
@@ -91,12 +113,12 @@ export const disconnectSocket = () => {
     connectionState.listeners.forEach((setConnected) => setConnected(false));
     connectionListenersSetup = false;
     messageListenersSetup = false;
-    currentToken = null;
+    currentAccessToken = null;
   }
 };
 
-const getSocket = (token) => {
-  if (!token) {
+const getSocket = (accessToken) => {
+  if (!accessToken) {
     // If no token, disconnect existing socket
     if (socketInstance) {
       disconnectSocket();
@@ -105,26 +127,26 @@ const getSocket = (token) => {
   }
 
   // If token changed, disconnect old socket and create new one
-  if (currentToken && currentToken !== token && socketInstance) {
+  if (currentAccessToken && currentAccessToken !== accessToken && socketInstance) {
     console.log("🔄 Token changed, reconnecting socket...");
     disconnectSocket();
   }
 
   // If socket exists and is connected with same token, reuse it
-  if (socketInstance?.connected && currentToken === token) {
+  if (socketInstance?.connected && currentAccessToken === accessToken) {
     return socketInstance;
   }
 
   // If socket exists but disconnected, reconnect
-  if (socketInstance && !socketInstance.connected && currentToken === token) {
+  if (socketInstance && !socketInstance.connected && currentAccessToken === accessToken) {
     socketInstance.connect();
     return socketInstance;
   }
 
   // Create new socket instance
-  currentToken = token;
+  currentAccessToken = accessToken;
   socketInstance = io(SOCKET_URL, {
-    auth: { token },
+    auth: { token: accessToken },
     transports: ["websocket", "polling"],
     reconnection: true,
     reconnectionDelay: 1000,
@@ -172,8 +194,8 @@ const getSocket = (token) => {
 };
 
 // Get or create socket instance
-export const getSocketInstance = (token) => {
-  const socket = getSocket(token);
+export const getSocketInstance = (accessToken) => {
+  const socket = getSocket(accessToken);
   if (socket && !messageListenersSetup) {
     setupMessageListeners(socket);
   }

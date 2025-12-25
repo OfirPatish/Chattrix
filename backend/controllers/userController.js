@@ -1,29 +1,23 @@
-import User from "../models/User.js";
+import * as userService from "../services/userService.js";
+import { sendSuccess, sendPaginated } from "../utils/response.js";
+import { normalizePagination } from "../utils/validators.js";
 
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private
 export const getUsers = async (req, res, next) => {
   try {
-    const keyword = req.query.search
-      ? {
-          $or: [
-            { username: { $regex: req.query.search, $options: "i" } },
-            { email: { $regex: req.query.search, $options: "i" } },
-          ],
-        }
-      : {};
+    // Normalize pagination parameters
+    const { page, limit } = normalizePagination(req.query, 20);
 
-    const users = await User.find({
-      ...keyword,
-      _id: { $ne: req.user._id }, // Exclude current user
-    }).select("username email avatar isOnline lastSeen");
+    const { users, pagination } = await userService.searchUsers(
+      req.user._id,
+      req.query.search,
+      page,
+      limit
+    );
 
-    res.json({
-      success: true,
-      count: users.length,
-      data: users,
-    });
+    return sendPaginated(res, users, pagination);
   } catch (error) {
     next(error);
   }
@@ -34,21 +28,8 @@ export const getUsers = async (req, res, next) => {
 // @access  Private
 export const getUserById = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select(
-      "username email avatar isOnline lastSeen createdAt"
-    );
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      data: user,
-    });
+    const user = await userService.getUserById(req.params.id);
+    return sendSuccess(res, user);
   } catch (error) {
     next(error);
   }
@@ -60,36 +41,11 @@ export const getUserById = async (req, res, next) => {
 export const updateProfile = async (req, res, next) => {
   try {
     const { username, avatar } = req.body;
-
-    const user = await User.findById(req.user._id);
-
-    if (username) {
-      // Check if username is already taken
-      const usernameExists = await User.findOne({
-        username,
-        _id: { $ne: req.user._id },
-      });
-
-      if (usernameExists) {
-        return res.status(400).json({
-          success: false,
-          message: "Username already taken",
-        });
-      }
-
-      user.username = username;
-    }
-
-    if (avatar !== undefined) {
-      user.avatar = avatar;
-    }
-
-    await user.save();
-
-    res.json({
-      success: true,
-      data: user,
+    const user = await userService.updateUserProfile(req.user._id, {
+      username,
+      avatar,
     });
+    return sendSuccess(res, user);
   } catch (error) {
     next(error);
   }

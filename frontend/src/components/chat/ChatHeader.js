@@ -26,41 +26,47 @@ export default function ChatHeader({ chat }) {
 
   return (
     <>
-      <div className="px-5 py-4 border-b border-base-300 bg-base-100/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 h-11">
-          <div className="avatar placeholder">
+      <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 border-b border-base-300 bg-base-100">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="avatar placeholder relative flex-shrink-0">
             {getAvatarUrl(otherUser?.avatar, otherUser?.username) ? (
-              <div className="w-11 h-11 rounded-full overflow-hidden shadow-md ring-2 ring-base-100">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-base-300">
                 <Image
                   src={getAvatarUrl(otherUser?.avatar, otherUser?.username)}
                   alt={otherUser?.username || "Avatar"}
-                  width={44}
-                  height={44}
+                  width={40}
+                  height={40}
                   className="w-full h-full object-cover"
                   unoptimized
                 />
               </div>
             ) : (
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center shadow-md ring-2 ring-base-100">
-                <User className="h-6 w-6" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center ring-1 ring-base-300">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
+            )}
+            {otherUser?.isOnline && (
+              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-success rounded-full border-2 border-base-100" />
             )}
           </div>
           <div className="flex-1 min-w-0">
             <button
               onClick={() => otherUser?._id && handleViewProfile(otherUser._id)}
-              className="font-semibold truncate text-base hover:text-primary transition-colors text-left w-full"
+              className="font-semibold truncate text-sm sm:text-base hover:text-primary transition-colors text-left w-full"
               disabled={isLoadingUser}
             >
               {otherUser?.username || "Unknown User"}
             </button>
-            <p
-              className={`text-xs mt-0.5 ${
-                otherUser?.isOnline ? "text-success" : "text-base-content/70"
-              }`}
-            >
-              {otherUser?.isOnline ? "Online" : "Offline"}
-            </p>
+            <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${
+                  otherUser?.isOnline ? "bg-success" : "bg-base-content/30"
+                }`}
+              />
+              <p className="text-xs text-base-content/60">
+                {otherUser?.isOnline ? "Online" : "Offline"}
+              </p>
+            </div>
           </div>
         </div>
       </div>

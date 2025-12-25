@@ -117,7 +117,7 @@ export default function MessageList({ onNewChat }) {
       <ChatHeader chat={currentChat} />
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-3 md:p-4 bg-base-200 min-h-0"
+        className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 bg-base-200 min-h-0 scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent"
       >
         {hasMore && (
           <div className="flex justify-center py-2">
@@ -148,9 +148,9 @@ export default function MessageList({ onNewChat }) {
             ({ message, showAvatar, isGrouped, needsDateSeparator }) => (
               <div key={message._id}>
                 {needsDateSeparator && (
-                  <div className="flex items-center justify-center my-4">
-                    <div className="px-3 py-1 bg-base-300/50 rounded-full">
-                      <span className="text-xs text-base-content/60 font-medium">
+                  <div className="flex items-center justify-center my-6">
+                    <div className="px-4 py-1.5 bg-base-300/70 backdrop-blur-sm rounded-full border border-base-300 shadow-sm">
+                      <span className="text-xs text-base-content/70 font-semibold">
                         {formatMessageDate(message.createdAt)}
                       </span>
                     </div>

@@ -3,11 +3,12 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "motion/react";
 import useAuthStore from "@/store/authStore";
 import { useSettings } from "@/hooks/settings/useSettings";
 import ProfileSection from "@/components/settings/ProfileSection";
 import SettingsSection from "@/components/settings/SettingsSection";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, Settings as SettingsIcon } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -19,6 +20,9 @@ export default function SettingsPage() {
     setIsEditing,
     handleUpdateProfile,
     isButtonLoading,
+    error,
+    fieldErrors,
+    clearError,
   } = useSettings();
 
   useEffect(() => {
@@ -42,61 +46,84 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
-      {/* Header */}
-      <div className="bg-base-100/80 backdrop-blur-xl border-b border-base-300 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4">
-          <div className="flex items-center gap-3 sm:gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-base-200 via-base-200 to-base-100">
+      {/* Modern Header */}
+      <div className="bg-base-100 border-b-2 border-base-300 shadow-sm sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center gap-4">
             <Link
               href="/chat"
-              className="p-2 rounded-xl hover:bg-base-200 transition-colors flex-shrink-0"
+              className="btn btn-ghost btn-sm btn-circle hover:bg-base-200"
+              aria-label="Back to chat"
             >
-              <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 text-base-content" />
+              <ArrowLeft className="h-5 w-5" />
             </Link>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-base-content truncate">
-                Settings
-              </h1>
-              <p className="text-xs sm:text-sm text-base-content/60">
-                Manage your account
-              </p>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md">
+                <SettingsIcon className="h-5 w-5 text-primary-content" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold text-base-content truncate">
+                  Settings
+                </h1>
+                <p className="text-xs sm:text-sm text-base-content/60">
+                  Manage your account and preferences
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8">
-        <ProfileSection
-          user={user}
-          profileData={profileData}
-          setProfileData={setProfileData}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          onUpdateProfile={handleUpdateProfile}
-          isButtonLoading={isButtonLoading}
-        />
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="space-y-6"
+        >
+          {/* Profile Section */}
+          <ProfileSection
+            user={user}
+            profileData={profileData}
+            setProfileData={setProfileData}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            onUpdateProfile={handleUpdateProfile}
+            isButtonLoading={isButtonLoading}
+            error={error}
+            fieldErrors={fieldErrors}
+            clearError={clearError}
+          />
 
-        <SettingsSection />
+          {/* Settings Sections */}
+          <SettingsSection />
 
-        {/* Danger Zone */}
-        <div className="card bg-base-100/80 backdrop-blur-xl shadow-lg border border-error overflow-hidden mt-4 sm:mt-6">
-          <div className="card-body p-0">
-            <div className="p-3 sm:p-4 border-b border-error bg-error/10">
-              <h3 className="text-base sm:text-lg font-semibold text-error truncate">
-                Danger Zone
-              </h3>
-            </div>
-            <div className="p-3 sm:p-4">
-              <button
-                onClick={handleLogout}
-                className="btn btn-error w-full btn-sm sm:btn-md"
-              >
-                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
-                Logout
-              </button>
+          {/* Danger Zone */}
+          <div className="card bg-base-100 shadow-xl border-2 border-error/30 overflow-hidden">
+            <div className="card-body p-0">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-error/30 bg-error/5">
+                <h3 className="text-base sm:text-lg font-bold text-error flex items-center gap-2">
+                  <div className="w-1 h-6 bg-error rounded-full" />
+                  Danger Zone
+                </h3>
+                <p className="text-xs sm:text-sm text-error/70 mt-1">
+                  Irreversible actions
+                </p>
+              </div>
+              <div className="p-4 sm:p-6">
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-error w-full sm:w-auto gap-2"
+                >
+                  <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

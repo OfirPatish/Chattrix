@@ -23,33 +23,122 @@ const api = axios.create({
   },
 });
 
-// Add token to requests if available
+// Track if refresh is in progress to prevent multiple simultaneous refresh calls
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Add accessToken to requests if available
 api.interceptors.request.use((config) => {
-  // Get token from Zustand store (which persists to localStorage)
-  const token = useAuthStore.getState().token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Get accessToken from Zustand store (which persists to localStorage)
+  const accessToken = useAuthStore.getState().accessToken;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
 
-// Handle response errors
+// Handle response errors and token refresh
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Don't redirect on auth endpoints (login/register) - let them handle errors
-      const isAuthEndpoint =
-        error.config?.url?.includes("/auth/login") ||
-        error.config?.url?.includes("/auth/register");
+  async (error) => {
+    const originalRequest = error.config;
 
-      if (!isAuthEndpoint) {
-        // Only redirect to login for protected endpoints, not auth endpoints
-        // Clear auth via Zustand store (which handles localStorage)
+    // Don't retry refresh/logout/auth endpoints
+    const isAuthEndpoint =
+      originalRequest?.url?.includes("/auth/login") ||
+      originalRequest?.url?.includes("/auth/register") ||
+      originalRequest?.url?.includes("/auth/refresh") ||
+      originalRequest?.url?.includes("/auth/logout");
+
+    // Handle 401 errors (expired access token)
+    if (
+      error.response?.status === 401 &&
+      !isAuthEndpoint &&
+      !originalRequest._retry
+    ) {
+      if (isRefreshing) {
+        // If refresh is already in progress, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = useAuthStore.getState().refreshToken;
+
+      if (!refreshToken) {
+        // No refresh token available, logout
+        isRefreshing = false;
         useAuthStore.getState().logout();
         window.location.href = "/login";
+        return Promise.reject(error);
+      }
+
+      try {
+        // Attempt to refresh the access token
+        const response = await axios.post(`${API_URL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        if (response.data.success && response.data.data) {
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+            response.data.data;
+
+          // Update tokens in store
+          useAuthStore.getState().setAccessToken(newAccessToken);
+          if (newRefreshToken) {
+            useAuthStore.getState().setRefreshToken(newRefreshToken);
+          }
+
+          // Update the original request with new token
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+          // Process queued requests
+          processQueue(null, newAccessToken);
+
+          isRefreshing = false;
+
+          // Retry the original request
+          return api(originalRequest);
+        } else {
+          throw new Error("Refresh token response invalid");
+        }
+      } catch (refreshError) {
+        // Refresh failed, logout user
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        useAuthStore.getState().logout();
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
       }
     }
+
+    // For other errors or auth endpoints, handle normally
+    if (error.response?.status === 401 && isAuthEndpoint) {
+      // Let auth endpoints handle their own errors
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );
@@ -68,13 +157,21 @@ export const authAPI = {
     const response = await api.get("/auth/me");
     return response.data;
   },
+  refreshToken: async (refreshToken) => {
+    const response = await api.post("/auth/refresh", { refreshToken });
+    return response.data;
+  },
+  logout: async (refreshToken) => {
+    const response = await api.post("/auth/logout", { refreshToken });
+    return response.data;
+  },
 };
 
 // User API
 export const userAPI = {
-  getUsers: async (search = "") => {
+  getUsers: async (search = "", page = 1, limit = 20) => {
     const response = await api.get("/users", {
-      params: { search },
+      params: { search, page, limit },
     });
     return response.data;
   },

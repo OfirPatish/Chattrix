@@ -1,37 +1,41 @@
 import mongoose from "mongoose";
+import logger from "./logger.js";
 
-export const setupGracefulShutdown = (httpServer) => {
+export const setupGracefulShutdown = (httpServer, io) => {
   const gracefulShutdown = async (signal) => {
-    console.log(`\n${signal} received. Shutting down gracefully...`);
+    logger.info({ signal }, "Shutting down gracefully...");
+
+    // Close Socket.io server first
+    if (io) {
+      io.close(() => {
+        logger.info("Socket.io server closed");
+      });
+    }
 
     httpServer.close(() => {
-      console.log("HTTP server closed");
+      logger.info("HTTP server closed");
       mongoose.connection.close(false, () => {
-        console.log("MongoDB connection closed");
+        logger.info("MongoDB connection closed");
         process.exit(0);
       });
     });
 
     // Force close after 10 seconds
     setTimeout(() => {
-      console.error(
-        "Could not close connections in time, forcefully shutting down"
-      );
+      logger.fatal("Could not close connections in time, forcefully shutting down");
       process.exit(1);
     }, 10000);
   };
 
   // Handle unhandled promise rejections
   process.on("unhandledRejection", (err) => {
-    console.error("UNHANDLED PROMISE REJECTION! 💥 Shutting down...");
-    console.error(err.name, err.message);
+    logger.fatal({ err }, "Unhandled promise rejection - shutting down");
     gracefulShutdown("unhandledRejection");
   });
 
   // Handle uncaught exceptions
   process.on("uncaughtException", (err) => {
-    console.error("UNCAUGHT EXCEPTION! 💥 Shutting down...");
-    console.error(err.name, err.message);
+    logger.fatal({ err }, "Uncaught exception - shutting down");
     process.exit(1);
   });
 

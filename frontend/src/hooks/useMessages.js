@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { messageAPI } from "@/lib/api";
+import { extractErrorMessage } from "@/utils/errorUtils";
 
 // Get messages for a chat with pagination
 export function useMessages(chatId, page = 1, limit = 50) {
@@ -17,7 +18,7 @@ export function useMessages(chatId, page = 1, limit = 50) {
         };
       }
       throw new Error(
-        response?.error || response?.message || "Failed to fetch messages"
+        response?.message || response?.error || "Failed to fetch messages"
       );
     },
     enabled: !!chatId,
@@ -41,7 +42,7 @@ export function useInfiniteMessages(chatId, limit = 50) {
         };
       }
       throw new Error(
-        response?.error || response?.message || "Failed to fetch messages"
+        response?.message || response?.error || "Failed to fetch messages"
       );
     },
     enabled: !!chatId,

@@ -15,15 +15,7 @@ if (!frontendUrl) {
     console.warn(
       "⚠️  FRONTEND_URL not set in production - CORS will allow all origins"
     );
-  } else {
-    // Only log once in development, not on every request
-    console.log(
-      "⚠️  CORS: FRONTEND_URL not set, allowing all origins (development mode)"
-    );
   }
-} else {
-  const normalized = normalizeUrl(frontendUrl);
-  console.log(`✅ CORS: Frontend URL configured: ${normalized}`);
 }
 
 export const corsOptions = {

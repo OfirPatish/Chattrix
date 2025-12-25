@@ -14,10 +14,10 @@ export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(
     getConnectionState().isConnected
   );
-  const { token, user } = useAuthStore();
+  const { accessToken, user } = useAuthStore();
 
   useEffect(() => {
-    if (!token || !user) {
+    if (!accessToken || !user) {
       // If no token/user, disconnect socket
       if (getSocketInstanceRef()) {
         disconnectSocket();
@@ -26,7 +26,7 @@ export const useSocket = () => {
     }
 
     // Get or create socket instance
-    const socket = getSocketInstance(token);
+    const socket = getSocketInstance(accessToken);
     if (!socket) {
       return;
     }
@@ -44,7 +44,7 @@ export const useSocket = () => {
     return () => {
       connectionState.listeners.delete(setIsConnected);
     };
-  }, [token, user]);
+  }, [accessToken, user]);
 
   // Memoize sendMessage to prevent recreation
   const sendMessage = useCallback(

@@ -11,10 +11,11 @@ export default function PasswordInput({
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const inputId = props.id || `password-${label?.toLowerCase().replace(/\s+/g, "-") || Math.random().toString(36).substring(7)}`;
 
   return (
     <div className="form-control">
-      <label className="label pb-2">
+      <label htmlFor={inputId} className="label pb-2">
         <span className="label-text font-semibold text-sm sm:text-base">
           {label}
         </span>
@@ -24,6 +25,7 @@ export default function PasswordInput({
         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/60 pointer-events-none z-10" />
         <input
           {...props}
+          id={inputId}
           type={showPassword ? "text" : "password"}
           className={`input input-bordered input-lg w-full text-sm sm:text-base pl-12 ${
             showPasswordToggle ? "pr-12" : "pr-4"

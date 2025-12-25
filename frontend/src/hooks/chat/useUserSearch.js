@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { userAPI } from "@/lib/api";
+import { extractErrorMessage } from "@/utils/errorUtils";
 
 /**
  * Hook to handle user search functionality with debouncing
@@ -27,15 +28,12 @@ export function useUserSearch() {
         if (response.success) {
           setUsers(Array.isArray(response.data) ? response.data : []);
         } else {
-          setError("Failed to search users");
+          setError(response?.message || "Failed to search users");
           setUsers([]);
         }
       } catch (error) {
         console.error("Search error:", error);
-        setError(
-          error.response?.data?.message ||
-            "Failed to search users. Please try again."
-        );
+        setError(extractErrorMessage(error, "Failed to search users. Please try again."));
         setUsers([]);
       } finally {
         setIsLoading(false);

@@ -1,5 +1,4 @@
 import express from "express";
-import { body } from "express-validator";
 import { protect } from "../middleware/auth.js";
 import { validate } from "../middleware/validation.js";
 import {
@@ -7,21 +6,20 @@ import {
   getUserById,
   updateProfile,
 } from "../controllers/userController.js";
+import { validateObjectId } from "../utils/validators.js";
+import {
+  getUsersValidators,
+  updateProfileValidators,
+} from "../validators/userValidators.js";
 
 const router = express.Router();
 
-router.get("/", protect, getUsers);
-router.get("/:id", protect, getUserById);
+router.get("/", protect, getUsersValidators, validate, getUsers);
+router.get("/:id", protect, validateObjectId("id"), validate, getUserById);
 router.put(
   "/profile",
   protect,
-  [
-    body("username")
-      .optional()
-      .trim()
-      .isLength({ min: 3, max: 20 })
-      .withMessage("Username must be between 3 and 20 characters"),
-  ],
+  updateProfileValidators,
   validate,
   updateProfile
 );

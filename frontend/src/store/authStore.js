@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authAPI } from "@/lib/api";
+import { extractErrorMessage } from "@/utils/errorUtils";
 
 const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
+      accessToken: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -19,7 +21,8 @@ const useAuthStore = create(
             const { data } = response;
             set({
               user: data,
-              token: data.token,
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -27,24 +30,7 @@ const useAuthStore = create(
             return { success: true, data };
           }
         } catch (error) {
-          let errorMessage = "Login failed";
-          if (error.response?.data) {
-            // Handle validation errors (array format)
-            if (
-              error.response.data.errors &&
-              Array.isArray(error.response.data.errors)
-            ) {
-              errorMessage = error.response.data.errors
-                .map((err) => err.msg || err.message)
-                .join(", ");
-            } else {
-              // Handle regular error messages
-              errorMessage =
-                error.response.data.message ||
-                error.response.data.error ||
-                "Login failed";
-            }
-          }
+          const errorMessage = extractErrorMessage(error, "Login failed");
           set({ error: errorMessage, isLoading: false });
           return { success: false, error: errorMessage };
         }
@@ -62,7 +48,8 @@ const useAuthStore = create(
             const { data } = response;
             set({
               user: data,
-              token: data.token,
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -70,30 +57,28 @@ const useAuthStore = create(
             return { success: true, data };
           }
         } catch (error) {
-          let errorMessage = "Registration failed";
-          if (error.response?.data) {
-            // Handle validation errors (array format)
-            if (
-              error.response.data.errors &&
-              Array.isArray(error.response.data.errors)
-            ) {
-              errorMessage = error.response.data.errors
-                .map((err) => err.msg || err.message)
-                .join(", ");
-            } else {
-              // Handle regular error messages
-              errorMessage =
-                error.response.data.message ||
-                error.response.data.error ||
-                "Registration failed";
-            }
-          }
+          const errorMessage = extractErrorMessage(
+            error,
+            "Registration failed"
+          );
           set({ error: errorMessage, isLoading: false });
           return { success: false, error: errorMessage };
         }
       },
 
-      logout: () => {
+      logout: async () => {
+        const { refreshToken } = get();
+
+        // Call logout API endpoint if refreshToken exists
+        if (refreshToken) {
+          try {
+            await authAPI.logout(refreshToken);
+          } catch (error) {
+            // Continue with logout even if API call fails
+            console.error("Logout API call failed:", error);
+          }
+        }
+
         // Import chatStore dynamically to avoid circular dependency
         import("@/store/chatStore").then(({ default: useChatStore }) => {
           useChatStore.getState().clearAll();
@@ -104,7 +89,8 @@ const useAuthStore = create(
         });
         set({
           user: null,
-          token: null,
+          accessToken: null,
+          refreshToken: null,
           isAuthenticated: false,
           error: null,
         });
@@ -114,8 +100,17 @@ const useAuthStore = create(
         set({ user, isAuthenticated: !!user });
       },
 
+      setAccessToken: (accessToken) => {
+        set({ accessToken });
+      },
+
+      setRefreshToken: (refreshToken) => {
+        set({ refreshToken });
+      },
+
+      // Backward compatibility - setToken maps to accessToken
       setToken: (token) => {
-        set({ token });
+        set({ accessToken: token });
       },
 
       setIsAuthenticated: (isAuthenticated) => {
@@ -128,8 +123,8 @@ const useAuthStore = create(
 
       // Verify and refresh auth state
       verifyAuth: async () => {
-        const { token } = get();
-        if (!token) {
+        const { accessToken } = get();
+        if (!accessToken) {
           return false;
         }
 
@@ -144,7 +139,8 @@ const useAuthStore = create(
           // Token invalid, clear auth
           set({
             user: null,
-            token: null,
+            accessToken: null,
+            refreshToken: null,
             isAuthenticated: false,
           });
           return false;
@@ -155,7 +151,8 @@ const useAuthStore = create(
       name: "auth-storage", // localStorage key
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

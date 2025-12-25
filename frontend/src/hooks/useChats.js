@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatAPI } from "@/lib/api";
 import useChatStore from "@/store/chatStore";
+import { extractErrorMessage } from "@/utils/errorUtils";
 
 // Get all chats query
 export function useChats() {
@@ -12,7 +13,7 @@ export function useChats() {
         return response.data;
       }
       throw new Error(
-        response?.error || response?.message || "Failed to fetch chats"
+        response?.message || response?.error || "Failed to fetch chats"
       );
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -31,7 +32,7 @@ export function useCreateChat() {
         return response.data;
       }
       throw new Error(
-        response?.error || response?.message || "Failed to create chat"
+        response?.message || response?.error || "Failed to create chat"
       );
     },
     onSuccess: (newChat) => {
@@ -56,7 +57,7 @@ export function useChatById(chatId) {
         return response.data;
       }
       throw new Error(
-        response?.error || response?.message || "Failed to fetch chat"
+        response?.message || response?.error || "Failed to fetch chat"
       );
     },
     enabled: !!chatId,

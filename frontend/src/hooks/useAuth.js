@@ -1,28 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { authAPI } from "@/lib/api";
 import useAuthStore from "@/store/authStore";
-
-// Helper to extract error message from API errors
-function extractErrorMessage(error) {
-  if (error.response?.data) {
-    // Handle validation errors (array format)
-    if (
-      error.response.data.errors &&
-      Array.isArray(error.response.data.errors)
-    ) {
-      return error.response.data.errors
-        .map((err) => err.msg || err.message)
-        .join(", ");
-    }
-    // Handle regular error messages
-    return (
-      error.response.data.message ||
-      error.response.data.error ||
-      "An error occurred"
-    );
-  }
-  return error.message || "An error occurred";
-}
+import { extractErrorMessage } from "@/utils/errorUtils";
 
 // Login mutation
 export function useLogin() {
@@ -37,7 +16,8 @@ export function useLogin() {
     onSuccess: (data) => {
       // Update Zustand store (which will persist to localStorage via persist middleware)
       useAuthStore.getState().setUser(data);
-      useAuthStore.getState().setToken(data.token);
+      useAuthStore.getState().setAccessToken(data.accessToken);
+      useAuthStore.getState().setRefreshToken(data.refreshToken);
       useAuthStore.getState().setIsAuthenticated(true);
     },
     onError: (error) => {
@@ -62,7 +42,8 @@ export function useRegister() {
     onSuccess: (data) => {
       // Update Zustand store (which will persist to localStorage via persist middleware)
       useAuthStore.getState().setUser(data);
-      useAuthStore.getState().setToken(data.token);
+      useAuthStore.getState().setAccessToken(data.accessToken);
+      useAuthStore.getState().setRefreshToken(data.refreshToken);
       useAuthStore.getState().setIsAuthenticated(true);
     },
     onError: (error) => {
@@ -74,12 +55,12 @@ export function useRegister() {
 
 // Get current user query
 export function useGetMe() {
-  const token = useAuthStore((state) => state.token);
+  const accessToken = useAuthStore((state) => state.accessToken);
 
   return useQuery({
     queryKey: ["auth", "me"],
     queryFn: async () => {
-      if (!token) {
+      if (!accessToken) {
         throw new Error("No token available");
       }
       const response = await authAPI.getMe();
@@ -90,7 +71,7 @@ export function useGetMe() {
         response?.error || response?.message || "Failed to get user"
       );
     },
-    enabled: !!token,
+    enabled: !!accessToken,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
     onSuccess: (user) => {

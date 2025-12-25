@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
-import Message from "../models/Message.js";
-import Chat from "../models/Chat.js";
 import User from "../models/User.js";
+import * as chatService from "../services/chatService.js";
+import * as messageService from "../services/messageService.js";
+import logger from "../utils/logger.js";
 
 export const setupSocketHandlers = (io) => {
   // Socket.io authentication middleware
@@ -32,36 +33,37 @@ export const setupSocketHandlers = (io) => {
   io.on("connection", async (socket) => {
     // Safety check: ensure user is authenticated
     if (!socket.user || !socket.userId) {
-      console.error("Socket connection without authenticated user");
+      logger.warn("Socket connection without authenticated user");
       socket.disconnect();
       return;
     }
 
-    console.log(
-      `✅ User connected: ${socket.user.username} (${socket.userId})`
-    );
+    logger.info(`👤 ${socket.user.username} connected`);
 
-    // Update user online status
+    // Update user online status and fetch chats in parallel
     try {
-      await User.findByIdAndUpdate(socket.userId, {
-        isOnline: true,
-        lastSeen: new Date(),
-      });
+      const [chatIds] = await Promise.all([
+        chatService.getUserChatIds(socket.userId),
+        User.findByIdAndUpdate(
+          socket.userId,
+          {
+            isOnline: true,
+            lastSeen: new Date(),
+          },
+          { new: false }
+        ),
+      ]);
+
+      // Join user's personal room
+      socket.join(socket.userId);
+
+      // Join all chat rooms user is part of (optimized)
+      if (chatIds.length > 0) {
+        socket.join(chatIds);
+      }
     } catch (error) {
-      console.error("Error updating user online status:", error);
+      logger.error({ err: error }, "Error setting up socket connection");
     }
-
-    // Join user's personal room
-    socket.join(socket.userId);
-
-    // Join all chat rooms user is part of
-    const userChats = await Chat.find({
-      participants: { $in: [socket.userId] },
-    });
-
-    userChats.forEach((chat) => {
-      socket.join(chat._id.toString());
-    });
 
     // Emit online status to all contacts
     socket.broadcast.emit("user-online", {
@@ -72,21 +74,19 @@ export const setupSocketHandlers = (io) => {
     // Handle join chat room
     socket.on("join-chat", async (chatId) => {
       try {
-        const chat = await Chat.findById(chatId);
-        if (chat && chat.participants.includes(socket.userId)) {
-          socket.join(chatId);
-          console.log(`User ${socket.user.username} joined chat ${chatId}`);
-        }
+        await chatService.verifyChatAccess(chatId, socket.userId);
+        socket.join(chatId);
       } catch (error) {
-        console.error("Join chat error:", error);
-        socket.emit("error", { message: "Failed to join chat" });
+        logger.error({ err: error }, "Join chat error");
+        socket.emit("error", {
+          message: error.message || "Failed to join chat",
+        });
       }
     });
 
     // Handle leave chat room
     socket.on("leave-chat", (chatId) => {
       socket.leave(chatId);
-      console.log(`User ${socket.user.username} left chat ${chatId}`);
     });
 
     // Handle new message
@@ -101,29 +101,15 @@ export const setupSocketHandlers = (io) => {
         const { chatId, content, messageType, imageUrl } = data;
 
         // Verify user is part of the chat
-        const chat = await Chat.findById(chatId);
-        if (!chat || !chat.participants.includes(socket.userId)) {
-          socket.emit("error", { message: "Access denied" });
-          return;
-        }
+        await chatService.verifyChatAccess(chatId, socket.userId);
 
-        // Create message
-        const message = await Message.create({
-          sender: socket.userId,
-          chat: chatId,
+        // Create message using service (includes transaction)
+        const populatedMessage = await messageService.createMessage(
+          socket.userId,
+          chatId,
           content,
-          messageType: messageType || "text",
-          imageUrl: imageUrl || "",
-        });
-
-        // Update chat's last message
-        chat.lastMessage = message._id;
-        await chat.save();
-
-        // Populate message data
-        const populatedMessage = await Message.findById(message._id).populate(
-          "sender",
-          "username email avatar"
+          messageType,
+          imageUrl
         );
 
         // Emit to all users in the chat room
@@ -135,8 +121,10 @@ export const setupSocketHandlers = (io) => {
           username: socket.user.username,
         });
       } catch (error) {
-        console.error("Send message error:", error);
-        socket.emit("error", { message: "Failed to send message" });
+        logger.error({ err: error }, "Send message error");
+        socket.emit("error", {
+          message: error.message || "Failed to send message",
+        });
       }
     });
 
@@ -173,32 +161,18 @@ export const setupSocketHandlers = (io) => {
         }
 
         const { messageId } = data;
-        const message = await Message.findById(messageId);
+        const message = await messageService.markMessageAsRead(
+          messageId,
+          socket.userId
+        );
 
-        if (message) {
-          const alreadyRead = message.readBy.some(
-            (read) => read.user.toString() === socket.userId
-          );
-
-          if (!alreadyRead) {
-            message.readBy.push({
-              user: socket.userId,
-              readAt: new Date(),
-            });
-            await message.save();
-
-            // Notify sender that message was read
-            const chat = await Chat.findById(message.chat);
-            if (chat) {
-              io.to(message.chat.toString()).emit("message-read", {
-                messageId: message._id,
-                userId: socket.userId,
-              });
-            }
-          }
-        }
+        // Emit read notification
+        io.to(message.chat.toString()).emit("message-read", {
+          messageId: message._id,
+          userId: socket.userId,
+        });
       } catch (error) {
-        console.error("Mark read error:", error);
+        logger.error({ err: error }, "Mark read error");
       }
     });
 
@@ -206,11 +180,10 @@ export const setupSocketHandlers = (io) => {
     socket.on("disconnect", async () => {
       // Safety check: user might be undefined if connection failed
       if (!socket.user || !socket.userId) {
-        console.log("❌ User disconnected (unauthenticated)");
         return;
       }
 
-      console.log(`❌ User disconnected: ${socket.user.username}`);
+      logger.info(`👤 ${socket.user.username} disconnected`);
 
       // Update user offline status
       try {
@@ -225,7 +198,7 @@ export const setupSocketHandlers = (io) => {
           isOnline: false,
         });
       } catch (error) {
-        console.error("Error updating user offline status:", error);
+        logger.error({ err: error }, "Error updating user offline status");
       }
     });
   });

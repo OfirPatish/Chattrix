@@ -16,6 +16,13 @@ const messageSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Message content is required'],
       trim: true,
+      maxlength: [5000, 'Message content cannot exceed 5000 characters'],
+      validate: {
+        validator: function (v) {
+          return v.trim().length > 0;
+        },
+        message: 'Message content cannot be empty',
+      },
     },
     messageType: {
       type: String,
@@ -44,9 +51,13 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
+// Indexes for faster queries
+// Compound index for paginated message queries (most common query)
 messageSchema.index({ chat: 1, createdAt: -1 });
+// Index for finding messages by sender
 messageSchema.index({ sender: 1 });
+// Index for chat + createdAt (alternative for different sort orders)
+messageSchema.index({ chat: 1, _id: -1 });
 
 const Message = mongoose.model('Message', messageSchema);
 

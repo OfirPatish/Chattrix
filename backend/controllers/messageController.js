@@ -1,5 +1,7 @@
-import Message from "../models/Message.js";
-import Chat from "../models/Chat.js";
+import * as messageService from "../services/messageService.js";
+import * as chatService from "../services/chatService.js";
+import { sendSuccess, sendCreated, sendPaginated } from "../utils/response.js";
+import { normalizePagination } from "../utils/validators.js";
 
 // @desc    Get all messages for a chat
 // @route   GET /api/messages/:chatId
@@ -7,41 +9,18 @@ import Chat from "../models/Chat.js";
 export const getMessages = async (req, res, next) => {
   try {
     // Verify user is part of the chat
-    const chat = await Chat.findById(req.params.chatId);
+    await chatService.verifyChatAccess(req.params.chatId, req.user._id);
 
-    if (!chat) {
-      return res.status(404).json({
-        success: false,
-        message: "Chat not found",
-      });
-    }
+    // Normalize pagination parameters
+    const { page, limit } = normalizePagination(req.query, 50);
 
-    if (!chat.participants.includes(req.user._id)) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
-    }
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const skip = (page - 1) * limit;
-
-    const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "username email avatar")
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip(skip);
-
-    res.json({
-      success: true,
-      count: messages.length,
+    const { messages, pagination } = await messageService.getChatMessages(
+      req.params.chatId,
       page,
-      pages: Math.ceil(
-        (await Message.countDocuments({ chat: req.params.chatId })) / limit
-      ),
-      data: messages.reverse(), // Return in chronological order
-    });
+      limit
+    );
+
+    return sendPaginated(res, messages, pagination);
   } catch (error) {
     next(error);
   }
@@ -54,51 +33,15 @@ export const createMessage = async (req, res, next) => {
   try {
     const { chatId, content, messageType, imageUrl } = req.body;
 
-    if (!chatId || !content) {
-      return res.status(400).json({
-        success: false,
-        message: "Chat ID and content are required",
-      });
-    }
-
-    // Verify user is part of the chat
-    const chat = await Chat.findById(chatId);
-
-    if (!chat) {
-      return res.status(404).json({
-        success: false,
-        message: "Chat not found",
-      });
-    }
-
-    if (!chat.participants.includes(req.user._id)) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
-    }
-
-    const message = await Message.create({
-      sender: req.user._id,
-      chat: chatId,
+    const message = await messageService.createMessage(
+      req.user._id,
+      chatId,
       content,
-      messageType: messageType || "text",
-      imageUrl: imageUrl || "",
-    });
-
-    // Update chat's last message
-    chat.lastMessage = message._id;
-    await chat.save();
-
-    const populatedMessage = await Message.findById(message._id).populate(
-      "sender",
-      "username email avatar"
+      messageType,
+      imageUrl
     );
 
-    res.status(201).json({
-      success: true,
-      data: populatedMessage,
-    });
+    return sendCreated(res, message);
   } catch (error) {
     next(error);
   }
@@ -109,32 +52,8 @@ export const createMessage = async (req, res, next) => {
 // @access  Private
 export const markMessageAsRead = async (req, res, next) => {
   try {
-    const message = await Message.findById(req.params.messageId);
-
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: "Message not found",
-      });
-    }
-
-    // Check if already read by this user
-    const alreadyRead = message.readBy.some(
-      (read) => read.user.toString() === req.user._id.toString()
-    );
-
-    if (!alreadyRead) {
-      message.readBy.push({
-        user: req.user._id,
-        readAt: new Date(),
-      });
-      await message.save();
-    }
-
-    res.json({
-      success: true,
-      message: "Message marked as read",
-    });
+    await messageService.markMessageAsRead(req.params.messageId, req.user._id);
+    return sendSuccess(res, null, "Message marked as read");
   } catch (error) {
     next(error);
   }

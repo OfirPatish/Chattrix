@@ -11,12 +11,9 @@ export const initialChatState = {
   hasInitiallyFetched: false, // Track if initial fetch has been attempted
 };
 
-// Helper to extract error message
-export const getErrorMessage = (error, defaultMsg) => {
-  return (
-    error?.response?.data?.error ||
-    error?.response?.data?.message ||
-    error?.message ||
-    defaultMsg
-  );
+import { extractErrorMessage } from "@/utils/errorUtils";
+
+// Helper to extract error message (backward compatibility)
+export const getErrorMessage = (error, defaultMsg = "An error occurred") => {
+  return extractErrorMessage(error, defaultMsg);
 };

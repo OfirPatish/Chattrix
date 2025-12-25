@@ -1,6 +1,6 @@
 import User from "../models/User.js";
-import { generateToken } from "../utils/generateToken.js";
-import { generateRandomAvatar } from "../utils/generateAvatar.js";
+import * as authService from "../services/authService.js";
+import { sendSuccess, sendCreated } from "../utils/response.js";
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -8,39 +8,12 @@ import { generateRandomAvatar } from "../utils/generateAvatar.js";
 export const register = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
+    const result = await authService.registerUser(username, email, password);
 
-    // Check if user already exists
-    const userExists = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: "User with this email or username already exists",
-      });
-    }
-
-    // Generate avatar for new user
-    const avatar = generateRandomAvatar(username);
-
-    // Create user
-    const user = await User.create({
-      username,
-      email,
-      password,
-      avatar,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        avatar: user.avatar,
-        token: generateToken(user._id),
-      },
+    return sendCreated(res, {
+      ...result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     });
   } catch (error) {
     next(error);
@@ -53,32 +26,12 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const result = await authService.loginUser(email, password);
 
-    // Find user and include password for comparison
-    const user = await User.findOne({ email }).select("+password");
-
-    if (!user || !(await user.matchPassword(password))) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
-
-    // Update online status
-    user.isOnline = true;
-    user.lastSeen = new Date();
-    await user.save();
-
-    res.json({
-      success: true,
-      data: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        avatar: user.avatar,
-        isOnline: user.isOnline,
-        token: generateToken(user._id),
-      },
+    return sendSuccess(res, {
+      ...result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     });
   } catch (error) {
     next(error);
@@ -91,10 +44,34 @@ export const login = async (req, res, next) => {
 export const getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    res.json({
-      success: true,
-      data: user,
-    });
+    return sendSuccess(res, user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Refresh access token
+// @route   POST /api/auth/refresh
+// @access  Public
+export const refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    const tokens = await authService.refreshAccessToken(refreshToken);
+    return sendSuccess(res, tokens);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Logout user (blacklist token)
+// @route   POST /api/auth/logout
+// @access  Private
+export const logout = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    const { refreshToken } = req.body;
+    await authService.logoutUser(token, refreshToken);
+    return sendSuccess(res, null, "Logged out successfully");
   } catch (error) {
     next(error);
   }

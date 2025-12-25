@@ -16,10 +16,12 @@ const FormInput = forwardRef(
     },
     ref
   ) => {
+    const inputId = props.id || `input-${label?.toLowerCase().replace(/\s+/g, "-") || Math.random().toString(36).substring(7)}`;
+
     return (
       <div className="form-control">
         {showLabel && (
-          <label className="label pb-2">
+          <label htmlFor={inputId} className="label pb-2">
             <span className="label-text font-semibold text-sm sm:text-base">
               {label}
             </span>
@@ -32,6 +34,7 @@ const FormInput = forwardRef(
           )}
           <input
             ref={ref}
+            id={inputId}
             className={`input input-bordered input-lg w-full text-sm sm:text-base ${
               Icon ? "pl-12" : "pl-4"
             } ${

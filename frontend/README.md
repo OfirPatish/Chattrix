@@ -1,63 +1,100 @@
 # Chattrix Frontend
 
-Modern React application built with Next.js 16, React 19, and Tailwind CSS 4.
+Modern React application built with Next.js 16, React 19, Tailwind CSS 4, and DaisyUI.
 
 ## 🛠️ Tech Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **UI:** React 19, Tailwind CSS 4, DaisyUI
-- **Animations:** Motion.dev
-- **State:** Zustand (persist middleware), TanStack Query
-- **Forms:** React Hook Form
-- **Real-time:** Socket.io Client
-- **HTTP:** Axios
+- **Framework:** Next.js 16.1.1 (App Router)
+- **UI:** React 19.2.3, Tailwind CSS 4.1.18, DaisyUI 5.5.14
+- **State Management:** Zustand 5.0.9 (with persist), TanStack Query 5.90.12
+- **Forms:** React Hook Form 7.69.0
+- **Real-time:** Socket.io Client 4.8.3
+- **HTTP Client:** Axios 1.13.2
+- **Animations:** Motion.dev 12.23.26
+- **Icons:** Lucide React 0.562.0
 
-## ✨ Features
+## ✨ Key Features
 
-- Landing page with animations
-- Authentication (login/register)
-- Real-time chat interface
-- User search & chat creation
-- Responsive design
-- Error boundaries
-- Loading states
-- Form validation
+- **Authentication:** JWT with automatic token refresh (access + refresh tokens)
+- **Real-time Chat:** Socket.io-powered instant messaging with typing indicators and read receipts
+- **Error Handling:** Comprehensive error handling with field-specific validation errors
+- **Responsive Design:** Mobile-first approach with DaisyUI components
+- **State Management:** Server state (TanStack Query) + Client state (Zustand)
+- **Performance:** Optimistic updates, request deduplication, efficient caching
+- **Error Boundaries:** Graceful error handling with React Error Boundary
 
-## 🚀 Getting Started
-
-```bash
-npm install
-cp .env.local.example .env.local
-npm run dev
-```
-
-**Environment Variables:**
-- `NEXT_PUBLIC_BACKEND_URL` - Backend server URL (recommended, e.g., `https://api.example.com`)
-  - API endpoints will use `${BACKEND_URL}/api`
-  - Socket.io will use `${BACKEND_URL}`
-- `NEXT_PUBLIC_API_URL` - Backend API URL (legacy, for backward compatibility)
-- `NEXT_PUBLIC_SOCKET_URL` - Socket.io server URL (legacy, for backward compatibility)
-
-## 📦 Key Libraries
-
-- `@tanstack/react-query` - Server state management
-- `react-hook-form` - Form handling
-- `motion` - Animations
-- `zustand` - Client state
-- `use-debounce` - Debouncing utilities
-
-## 🏗️ Structure
+## 🏗️ Architecture
 
 ```
 src/
-├── app/              # Pages
-├── components/       # UI components
-├── hooks/            # Custom hooks
+├── app/              # Next.js App Router pages
+├── components/       # React components (auth, chat, common, settings)
+├── hooks/            # Custom React hooks (chat, settings, socket)
 ├── store/            # Zustand stores
-├── lib/              # Utilities
-└── constants/        # Constants
+├── lib/              # API client (Axios with interceptors)
+└── utils/            # Utilities (error handling, avatars, helpers)
 ```
 
-## 📄 License
+## 🚀 Quick Start
 
-MIT
+```bash
+# Install dependencies
+npm install
+
+# Configure environment variables (optional)
+# Create .env.local with: NEXT_PUBLIC_BACKEND_URL=http://localhost:3000
+
+# Development
+npm run dev
+
+# Production build
+npm run build
+npm start
+```
+
+**Environment Variables:**
+
+- `NEXT_PUBLIC_BACKEND_URL` - Backend server URL (default: `http://localhost:3000`)
+
+## 🔐 Authentication
+
+- **Access Token:** Short-lived (15 minutes) for API requests
+- **Refresh Token:** Long-lived (7 days) for token renewal
+- **Automatic Refresh:** Axios interceptor automatically refreshes expired tokens
+- **Secure Storage:** Tokens stored in Zustand with localStorage persistence
+
+## 🛡️ Error Handling
+
+- **Centralized Utility:** `src/utils/errorUtils.js` for consistent error handling
+- **Field-Specific Errors:** Display validation errors next to input fields
+- **Error Types:** Handles validation (400/422), auth (401), forbidden (403), not found (404), conflict (409), server (500)
+
+## 🔌 Socket.io Integration
+
+- Automatic connection on authentication using `accessToken`
+- Events: `receive-message`, `typing-start/stopped`, `message-read`, `user-online/offline`
+- Automatic reconnection on token refresh
+
+## 📦 Key Dependencies
+
+- `next` - React framework with App Router
+- `@tanstack/react-query` - Server state management and caching
+- `zustand` - Lightweight client state management
+- `axios` - HTTP client with interceptors
+- `socket.io-client` - WebSocket client for real-time communication
+- `react-hook-form` - Form handling and validation
+- `daisyui` - Component library for Tailwind
+- `motion` - Animation library
+
+## 🎯 Best Practices Implemented
+
+- **Component Organization:** Modular, reusable components
+- **State Management:** Separation of server state (TanStack Query) and client state (Zustand)
+- **Error Handling:** Centralized error utility with consistent patterns
+- **Performance:** Optimistic updates, request deduplication, efficient caching
+- **Accessibility:** ARIA labels, keyboard navigation, semantic HTML
+
+---
+
+**Author:** Ofir Patish  
+**License:** MIT

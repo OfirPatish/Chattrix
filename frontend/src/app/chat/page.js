@@ -50,7 +50,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-base-200">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-base-200 via-base-200 to-base-100">
       <Navbar
         onMenuClick={() => setShowMobileSidebar(!showMobileSidebar)}
         showMobileSidebar={showMobileSidebar}
@@ -60,7 +60,7 @@ export default function ChatPage() {
       <div className="flex-1 flex overflow-hidden relative">
         {showMobileSidebar && (
           <div
-            className="fixed inset-0 bg-base-content/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+            className="fixed inset-0 bg-base-content/30 backdrop-blur-md z-40 lg:hidden transition-opacity"
             onClick={() => setShowMobileSidebar(false)}
           />
         )}
@@ -68,7 +68,7 @@ export default function ChatPage() {
         <div
           className={`fixed lg:static h-full left-0 z-50 lg:z-auto transform ${
             showMobileSidebar ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 transition-transform duration-300 ease-out w-80 bg-base-100 border-r border-base-300 flex flex-col shadow-xl lg:shadow-none`}
+          } lg:translate-x-0 transition-transform duration-300 ease-out w-full sm:w-80 lg:w-96 bg-base-100 border-r-2 border-base-300 flex flex-col shadow-2xl lg:shadow-lg`}
         >
           <ChatList
             onCloseMobile={() => setShowMobileSidebar(false)}
@@ -76,7 +76,7 @@ export default function ChatPage() {
           />
         </div>
 
-        <div className="flex-1 flex flex-col bg-base-100 min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col bg-base-100 min-w-0 overflow-hidden shadow-inner">
           <MessageList onNewChat={() => setShowUserSearch(true)} />
           <MessageInput />
         </div>

@@ -7,7 +7,7 @@ import ChatListItem from "./ChatListItem";
 import ChatListSkeleton from "./ChatListSkeleton";
 import EmptyState from "../EmptyState";
 import { useSocket } from "@/hooks/useSocket";
-import { X, MessageCircle, Wifi, WifiOff } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 export default function ChatList({ onCloseMobile, onNewChat }) {
   const {
@@ -39,56 +39,47 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
 
   return (
     <div className="flex flex-col h-full bg-base-100">
-      <div className="px-5 py-4 border-b border-base-300 bg-base-100/50 backdrop-blur-sm">
-        <div className="flex items-center justify-between h-11">
-          <h2 className="text-base font-semibold">Messages</h2>
-          <div className="flex items-center gap-2">
-            {/* Connection Status Indicator */}
-            <div
-              className={`badge gap-1.5 px-2.5 py-1.5 transition-all ${
-                isConnected
-                  ? "badge-success badge-outline"
-                  : "badge-warning badge-outline"
-              }`}
-            >
-              {isConnected ? (
-                <Wifi className="h-3.5 w-3.5" />
-              ) : (
-                <WifiOff className="h-3.5 w-3.5 animate-pulse" />
-              )}
-              <span className="text-xs font-medium hidden sm:inline">
-                {isConnected ? "Connected" : "Connecting"}
-              </span>
-            </div>
-            {onCloseMobile && (
-              <button
-                className="btn btn-ghost btn-sm btn-circle lg:hidden"
-                onClick={onCloseMobile}
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
+      {/* Compact Header */}
+      <div className="px-4 py-4 border-b border-base-300 bg-base-100">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xl font-bold text-base-content">Chats</h2>
+          {/* Connection Status */}
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? "bg-success" : "bg-warning animate-pulse"
+            }`}
+            title={isConnected ? "Connected" : "Connecting"}
+          />
         </div>
+        {/* New Chat Button */}
+        <button
+          onClick={onNewChat}
+          className="btn btn-primary btn-sm w-full gap-2"
+        >
+          <MessageCircle className="h-4 w-4" />
+          New Chat
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent">
         {!hasInitiallyFetched ? (
-          <ChatListSkeleton count={3} />
+          <ChatListSkeleton count={5} />
         ) : error ? (
           <EmptyState
-            icon={<MessageCircle className="h-12 w-12 text-base-content/40" />}
+            icon={<MessageCircle className="h-16 w-16 text-base-content/40" />}
             title="Error loading chats"
             description={error}
           />
         ) : chats.length === 0 ? (
           <EmptyState
-            icon={<MessageCircle className="h-12 w-12 text-base-content/40" />}
+            icon={<MessageCircle className="h-16 w-16 text-base-content/40" />}
             title="No conversations yet"
-            description="Start a new chat to begin"
+            description="Start a new chat to begin messaging"
+            onAction={onNewChat}
+            actionLabel="Start New Chat"
           />
         ) : (
-          <div className="divide-y divide-base-200">
+          <div className="py-2">
             {chats.map((chat) => {
               const chatMessages = messages[chat._id] || [];
               const userId = user?._id;

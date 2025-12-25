@@ -20,11 +20,11 @@ export const generateAvatar = (seed, style = "avataaars") => {
       }),
     });
 
-    // Convert SVG to data URL (using URI encoding for better compatibility)
+    // Convert SVG to data URL (using base64 for more compact encoding)
     const svg = avatar.toString();
-    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-      svg
-    )}`;
+    // Convert to base64 for more compact encoding (smaller than URI encoding)
+    const base64 = btoa(unescape(encodeURIComponent(svg)));
+    const dataUrl = `data:image/svg+xml;base64,${base64}`;
 
     return dataUrl;
   } catch (error) {

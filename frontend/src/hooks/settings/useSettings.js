@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { userAPI } from "@/lib/api";
 import useAuthStore from "@/store/authStore";
+import { extractErrorMessage, extractFieldErrors } from "@/utils/errorUtils";
 
 /**
  * Hook to manage settings page state and profile updates
@@ -15,6 +16,8 @@ export function useSettings() {
     avatar: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Sync profileData when user changes, but only if not editing
   useEffect(() => {
@@ -33,10 +36,34 @@ export function useSettings() {
     setLocalLoading(true);
 
     try {
-      const response = await userAPI.updateProfile({
-        username: profileData.username,
-        avatar: profileData.avatar,
-      });
+      // Only send fields that have changed
+      const updates = {};
+      
+      if (profileData.username !== user?.username) {
+        updates.username = profileData.username;
+      }
+      
+      // Only include avatar if it has changed and is not empty
+      if (profileData.avatar !== user?.avatar && profileData.avatar?.trim()) {
+        // Validate avatar length (max 10000 characters)
+        if (profileData.avatar.length > 10000) {
+          setError("Avatar URL is too long. Please select a different avatar.");
+          setIsLoading(false);
+          setLocalLoading(false);
+          return;
+        }
+        updates.avatar = profileData.avatar;
+      }
+
+      // Don't send request if nothing changed
+      if (Object.keys(updates).length === 0) {
+        setIsEditing(false);
+        setIsLoading(false);
+        setLocalLoading(false);
+        return;
+      }
+
+      const response = await userAPI.updateProfile(updates);
 
       // Ensure minimum loading duration of 800ms for better UX
       const elapsedTime = performance.now() - startTime;
@@ -48,9 +75,19 @@ export function useSettings() {
       if (response.success) {
         setIsEditing(false);
         useAuthStore.getState().setUser(response.data);
+        setError(null);
+        setFieldErrors({});
+      } else {
+        // Handle non-success response
+        const errorMsg = response?.message || "Failed to update profile";
+        setError(errorMsg);
       }
     } catch (error) {
       console.error("Update error:", error);
+      const errorMessage = extractErrorMessage(error, "Failed to update profile");
+      const errors = extractFieldErrors(error);
+      setError(errorMessage);
+      setFieldErrors(errors);
     } finally {
       setIsLoading(false);
       setLocalLoading(false);
@@ -60,6 +97,12 @@ export function useSettings() {
   // Combine store loading state with local minimum duration
   const isButtonLoading = isLoading || localLoading;
 
+  // Memoize clearError to prevent infinite loops
+  const clearError = useCallback(() => {
+    setError(null);
+    setFieldErrors({});
+  }, []);
+
   return {
     profileData,
     setProfileData,
@@ -67,5 +110,8 @@ export function useSettings() {
     setIsEditing,
     handleUpdateProfile,
     isButtonLoading,
+    error,
+    fieldErrors,
+    clearError,
   };
 }
