@@ -19,7 +19,7 @@ import {
 import { MessageCircle, Mail } from "lucide-react";
 import LoadingIndicator from "@/components/common/LoadingIndicator";
 
-export default function MessageList({ onNewChat }) {
+export default function MessageList() {
   const {
     currentChat,
     messages,
@@ -105,8 +105,6 @@ export default function MessageList({ onNewChat }) {
           icon={<MessageCircle className="h-16 w-16 text-base-content/40" />}
           title="Welcome to Chattrix"
           description="Select a conversation from the sidebar or start a new chat"
-          onAction={onNewChat}
-          actionLabel="Start New Chat"
         />
       </div>
     );

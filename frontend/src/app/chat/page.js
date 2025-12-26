@@ -77,7 +77,7 @@ export default function ChatPage() {
         </div>
 
         <div className="flex-1 flex flex-col bg-base-100 min-w-0 overflow-hidden shadow-inner">
-          <MessageList onNewChat={() => setShowUserSearch(true)} />
+          <MessageList />
           <MessageInput />
         </div>
       </div>

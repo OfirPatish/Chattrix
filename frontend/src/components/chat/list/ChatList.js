@@ -75,8 +75,6 @@ export default function ChatList({ onCloseMobile, onNewChat }) {
             icon={<MessageCircle className="h-16 w-16 text-base-content/40" />}
             title="No conversations yet"
             description="Start a new chat to begin messaging"
-            onAction={onNewChat}
-            actionLabel="Start New Chat"
           />
         ) : (
           <div className="py-2">
