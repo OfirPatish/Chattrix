@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { getAvatarUrl } from "@/utils/avatarUtils";
 import Image from "next/image";
-import { User as UserIcon, RefreshCw, AlertCircle, CheckCircle2, Edit2 } from "lucide-react";
+import {
+  User as UserIcon,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Edit2,
+} from "lucide-react";
 import AvatarSelector from "./AvatarSelector";
 import ErrorDisplay from "@/components/auth/ErrorDisplay";
 
@@ -32,8 +38,8 @@ export default function ProfileSection({
   }, [isEditing]);
 
   // Check if there are unsaved changes
-  const hasChanges = 
-    profileData.username !== user?.username || 
+  const hasChanges =
+    profileData.username !== user?.username ||
     profileData.avatar !== user?.avatar;
 
   return (
@@ -49,8 +55,19 @@ export default function ProfileSection({
               className="btn btn-sm btn-ghost btn-circle"
               aria-label="Close success message"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -61,11 +78,13 @@ export default function ProfileSection({
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <div className="relative flex-shrink-0">
               {getAvatarUrl(user?.avatar, user?.username) ? (
-                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden shadow-lg ring-2 transition-all ${
-                  isEditing && profileData.avatar !== user?.avatar 
-                    ? "ring-success ring-offset-2 ring-offset-base-100" 
-                    : "ring-base-200"
-                }`}>
+                <div
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden shadow-lg ring-2 transition-all ${
+                    isEditing && profileData.avatar !== user?.avatar
+                      ? "ring-success ring-offset-2 ring-offset-base-100"
+                      : "ring-base-200"
+                  }`}
+                >
                   <Image
                     src={getAvatarUrl(user?.avatar, user?.username)}
                     alt={user?.username || "Avatar"}
@@ -76,11 +95,13 @@ export default function ProfileSection({
                   />
                 </div>
               ) : (
-                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content shadow-lg ring-2 transition-all ${
-                  isEditing && profileData.avatar !== user?.avatar 
-                    ? "ring-success ring-offset-2 ring-offset-base-100" 
-                    : "ring-base-200"
-                }`}>
+                <div
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content shadow-lg ring-2 transition-all ${
+                    isEditing && profileData.avatar !== user?.avatar
+                      ? "ring-success ring-offset-2 ring-offset-base-100"
+                      : "ring-base-200"
+                  }`}
+                >
                   <UserIcon className="h-8 w-8 sm:h-10 sm:w-10" />
                 </div>
               )}
@@ -97,12 +118,16 @@ export default function ProfileSection({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className={`text-xl sm:text-2xl font-bold truncate transition-colors ${
-                  isEditing && profileData.username !== user?.username
-                    ? "text-success"
-                    : "text-base-content"
-                }`}>
-                  {isEditing ? profileData.username || "User" : user?.username || "User"}
+                <h2
+                  className={`text-xl sm:text-2xl font-bold truncate transition-colors ${
+                    isEditing && profileData.username !== user?.username
+                      ? "text-success"
+                      : "text-base-content"
+                  }`}
+                >
+                  {isEditing
+                    ? profileData.username || "User"
+                    : user?.username || "User"}
                 </h2>
                 {isEditing && profileData.username !== user?.username && (
                   <div className="badge badge-success badge-sm gap-1">
@@ -147,8 +172,18 @@ export default function ProfileSection({
             {/* Change indicator */}
             {hasChanges && (
               <div className="alert alert-info shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-5 w-5 stroke-current shrink-0">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5 stroke-current shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
                 </svg>
                 <span className="text-sm">You have unsaved changes</span>
               </div>
@@ -167,11 +202,13 @@ export default function ProfileSection({
                 </span>
               </label>
               <div className="relative">
-                <UserIcon className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 z-10 pointer-events-none transition-colors ${
-                  profileData.username !== user?.username 
-                    ? "text-success" 
-                    : "text-base-content/40"
-                }`} />
+                <UserIcon
+                  className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 z-10 pointer-events-none transition-colors ${
+                    profileData.username !== user?.username
+                      ? "text-success"
+                      : "text-base-content/40"
+                  }`}
+                />
                 <input
                   type="text"
                   value={profileData.username}
@@ -185,8 +222,8 @@ export default function ProfileSection({
                     }
                   }}
                   className={`input input-bordered w-full pl-12 pr-4 focus:outline-none transition-all ${
-                    fieldErrors?.username 
-                      ? "input-error" 
+                    fieldErrors?.username
+                      ? "input-error"
                       : profileData.username !== user?.username
                       ? "input-success border-success/50"
                       : ""
@@ -219,7 +256,9 @@ export default function ProfileSection({
                 </label>
                 <div className="alert alert-success shadow-sm">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span className="text-sm">Avatar will be updated when you save</span>
+                  <span className="text-sm">
+                    Avatar will be updated when you save
+                  </span>
                 </div>
               </div>
             )}

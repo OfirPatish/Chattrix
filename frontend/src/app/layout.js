@@ -44,7 +44,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme="dracula">
+    <html lang="en" data-theme="dracula" data-scroll-behavior="smooth">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
