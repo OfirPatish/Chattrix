@@ -44,6 +44,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "generate-users": "node scripts/generateUsers.js",
+    "reset-db": "node scripts/resetDatabase.js",
+    "create-demo-user": "node scripts/createDemoUser.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   }

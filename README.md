@@ -4,6 +4,11 @@ A modern, full-stack real-time chat application showcasing best practices in web
 
 **🌐 Live Demo:** [https://chattrix-frontend-ygl8.onrender.com](https://chattrix-frontend-ygl8.onrender.com)
 
+**🧪 Demo Account:**
+
+- **Email:** `demo@chattrix.com`
+- **Password:** `DemoUser123`
+
 ## 🚀 Tech Stack
 
 **Backend:** Node.js, Express.js 4.22.1, MongoDB with Mongoose 8.20.4, Socket.io 4.8.3  
@@ -48,6 +53,16 @@ npm run dev
 ```
 
 **Ports:** Backend (3000) | Frontend (3001)
+
+### Database Setup
+
+To reset the database and create a demo user:
+
+```bash
+cd backend
+npm run reset-db      # Clear all database data
+npm run create-demo-user  # Create demo account
+```
 
 ### Run Both Servers
 
