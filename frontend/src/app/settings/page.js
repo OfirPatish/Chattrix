@@ -23,6 +23,8 @@ export default function SettingsPage() {
     error,
     fieldErrors,
     clearError,
+    successMessage,
+    clearSuccess,
   } = useSettings();
 
   useEffect(() => {
@@ -95,6 +97,8 @@ export default function SettingsPage() {
             error={error}
             fieldErrors={fieldErrors}
             clearError={clearError}
+            successMessage={successMessage}
+            clearSuccess={clearSuccess}
           />
 
           {/* Settings Sections */}

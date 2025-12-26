@@ -29,16 +29,8 @@ function MessageBubble({ message, showAvatar, isGrouped }) {
         isOwn ? "flex-row-reverse" : "flex-row"
       } ${isGrouped ? "mb-1" : "mb-4"}`}
     >
-      {/* Avatar - only show for received messages and when not grouped */}
-      {!isOwn && (
-        <div className="flex-shrink-0 w-8 h-8 mt-1">
-          {showAvatar && !isGrouped ? (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary ring-2 ring-base-200" />
-          ) : (
-            <div className="w-8" />
-          )}
-        </div>
-      )}
+      {/* Spacer for received messages - no avatar shown */}
+      {!isOwn && <div className="flex-shrink-0 w-0" />}
 
       {/* Message Container */}
       <div
@@ -103,8 +95,8 @@ function MessageBubble({ message, showAvatar, isGrouped }) {
         </div>
       </div>
 
-      {/* Spacer for own messages */}
-      {isOwn && <div className="flex-shrink-0 w-8" />}
+      {/* Spacer for own messages - no avatar shown */}
+      {isOwn && <div className="flex-shrink-0 w-0" />}
     </div>
   );
 }

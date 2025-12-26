@@ -18,6 +18,7 @@ export function useSettings() {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Sync profileData when user changes, but only if not editing
   useEffect(() => {
@@ -77,6 +78,18 @@ export function useSettings() {
         useAuthStore.getState().setUser(response.data);
         setError(null);
         setFieldErrors({});
+        
+        // Set success message based on what was updated
+        const updatedFields = [];
+        if (updates.username) updatedFields.push("username");
+        if (updates.avatar) updatedFields.push("avatar");
+        
+        if (updatedFields.length > 0) {
+          const fieldNames = updatedFields.map(f => f === "username" ? "name" : "avatar").join(" and ");
+          setSuccessMessage(`${fieldNames.charAt(0).toUpperCase() + fieldNames.slice(1)} updated successfully!`);
+          // Clear success message after 5 seconds
+          setTimeout(() => setSuccessMessage(null), 5000);
+        }
       } else {
         // Handle non-success response
         const errorMsg = response?.message || "Failed to update profile";
@@ -103,6 +116,11 @@ export function useSettings() {
     setFieldErrors({});
   }, []);
 
+  // Clear success message
+  const clearSuccess = useCallback(() => {
+    setSuccessMessage(null);
+  }, []);
+
   return {
     profileData,
     setProfileData,
@@ -113,5 +131,7 @@ export function useSettings() {
     error,
     fieldErrors,
     clearError,
+    successMessage,
+    clearSuccess,
   };
 }
