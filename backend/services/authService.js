@@ -3,7 +3,12 @@ import TokenBlacklist from "../models/TokenBlacklist.js";
 import { generateTokens } from "../utils/generateToken.js";
 import { generateRandomAvatar } from "../utils/generateAvatar.js";
 import jwt from "jsonwebtoken";
-import { ConflictError, UnauthorizedError, NotFoundError, BadRequestError } from "../errors/AppError.js";
+import {
+  ConflictError,
+  UnauthorizedError,
+  NotFoundError,
+  BadRequestError,
+} from "../errors/AppError.js";
 
 export const registerUser = async (username, email, password) => {
   // Check if user already exists
@@ -79,11 +84,28 @@ export const refreshAccessToken = async (refreshToken) => {
     throw new UnauthorizedError("Token has been revoked");
   }
 
-  // Verify refresh token
-  const decoded = jwt.verify(
-    refreshToken,
-    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
-  );
+  // Verify refresh token - try both secrets for backward compatibility
+  // This handles migration from JWT_SECRET-only to JWT_REFRESH_SECRET
+  let decoded;
+  const refreshSecret =
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+  const accessSecret = process.env.JWT_SECRET;
+
+  try {
+    // First try with refresh secret (current/preferred method)
+    decoded = jwt.verify(refreshToken, refreshSecret);
+  } catch (error) {
+    // If refresh secret fails and they're different, try access secret (backward compatibility)
+    if (refreshSecret !== accessSecret && error.name === "JsonWebTokenError") {
+      try {
+        decoded = jwt.verify(refreshToken, accessSecret);
+      } catch (fallbackError) {
+        throw new UnauthorizedError("Invalid refresh token");
+      }
+    } else {
+      throw new UnauthorizedError("Invalid refresh token");
+    }
+  }
 
   // Get user
   const user = await User.findById(decoded.id);
@@ -122,4 +144,3 @@ export const logoutUser = async (accessToken, refreshToken) => {
     await TokenBlacklist.insertMany(tokensToBlacklist);
   }
 };
-

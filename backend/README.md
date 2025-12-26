@@ -49,7 +49,10 @@ npm install
 
 # Configure environment variables
 cp .env.example .env
-# Set: MONGO_URL, JWT_SECRET, PORT, FRONTEND_URL
+# Edit .env and set all required variables (see .env.example for details)
+# Required: MONGO_URL, JWT_SECRET
+# Required in production: FRONTEND_URL
+# Recommended: JWT_REFRESH_SECRET
 
 # Development
 npm run dev
