@@ -48,8 +48,7 @@ backend/
 npm install
 
 # Configure environment variables
-cp .env.example .env
-# Edit .env and set all required variables (see .env.example for details)
+# Create .env file with the following variables:
 # Required: MONGO_URL, JWT_SECRET
 # Required in production: FRONTEND_URL
 # Recommended: JWT_REFRESH_SECRET

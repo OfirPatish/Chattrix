@@ -81,8 +81,6 @@ chattrix/
 ## 📚 Documentation
 
 - **Backend API Reference:** [`backend/API_REFERENCE.md`](backend/API_REFERENCE.md)
-- **Backend Updates:** [`backend/PACKAGE_UPDATES.md`](backend/PACKAGE_UPDATES.md)
-- **Frontend Updates:** [`frontend/FRONTEND_UPDATES.md`](frontend/FRONTEND_UPDATES.md)
 - **Backend README:** [`backend/README.md`](backend/README.md)
 - **Frontend README:** [`frontend/README.md`](frontend/README.md)
 
