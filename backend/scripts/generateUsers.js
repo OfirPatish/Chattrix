@@ -11,27 +11,27 @@ const usersData = [
   {
     username: "alex_johnson",
     email: "alex.johnson@email.com",
-    password: "password123",
+    password: "Password123",
   },
   {
     username: "sarah_martinez",
     email: "sarah.martinez@email.com",
-    password: "password123",
+    password: "Password123",
   },
   {
     username: "michael_chen",
     email: "michael.chen@email.com",
-    password: "password123",
+    password: "Password123",
   },
   {
     username: "emily_williams",
     email: "emily.williams@email.com",
-    password: "password123",
+    password: "Password123",
   },
   {
     username: "david_brown",
     email: "david.brown@email.com",
-    password: "password123",
+    password: "Password123",
   },
 ];
 
